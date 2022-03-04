@@ -7,6 +7,9 @@
 #include <stdlib.h>
 #include "attestation_u.h"
 
+// SGX Local Attestation UUID.
+static oe_uuid_t sgx_local_uuid = {OE_FORMAT_UUID_SGX_LOCAL_ATTESTATION};
+//
 // SGX Remote Attestation UUID.
 static oe_uuid_t sgx_remote_uuid = {OE_FORMAT_UUID_SGX_ECDSA};
 
@@ -113,94 +116,6 @@ exit:
     return ret;
 }
 
-
-int generate_identity_report(    
-        const oe_uuid_t* format_id,
-        const char* attester_enclave_name,
-        oe_enclave_t* attester_enclave,
-        evidence_t evidence,
-        pem_key_t pem_key
-    ){
-    oe_result_t result = OE_OK;
-    int ret = 1;
-    format_settings_t format_settings = {0};
-    
-    printf("Use its own format setting\n");
-    result = get_enclave_format_settings(
-        attester_enclave, &ret, format_id, &format_settings);
-    if ((result != OE_OK) || (ret != 0))
-    {
-        printf("Host: get_format_settings failed. %s\n", oe_result_str(result));
-        if (ret == 0)
-            ret = 1;
-        goto exit;
-    }
-
-    printf(
-        "Host: Requesting %s to generate a targeted evidence with an "
-        "encryption key\n",
-        attester_enclave_name);
-
-    result = get_evidence_with_public_key(
-        attester_enclave,
-        &ret,
-        format_id,
-        &format_settings,
-        &pem_key,
-        &evidence);
-    if ((result != OE_OK) || (ret != 0))
-    {
-        printf(
-            "Host: get_evidence_with_public_key failed. %s\n",
-            oe_result_str(result));
-        if (ret == 0)
-            ret = 1;
-        goto exit;
-    }
-
-    printf(
-        "Host: %s's  public key: \n%s\n",
-        attester_enclave_name,
-        pem_key.buffer);
-
-exit:
-    free(format_settings.buffer);
-    return ret;
-}
-
-int verify_identity_report(
-    const oe_uuid_t* format_id,
-    const char* verifier_enclave_name,
-    oe_enclave_t* verifier_enclave,
-    evidence_t evidence, 
-    pem_key_t pem_key
-){
-    oe_result_t result = OE_OK;
-    int ret = 1;
-    format_settings_t format_settings = {0};
-
-    printf(
-        "Host: verify_evidence_and_set_public_key in %s\n",
-        verifier_enclave_name);
-    result = verify_evidence_and_set_public_key(
-        verifier_enclave, &ret, format_id, &pem_key, &evidence);
-    if ((result != OE_OK) || (ret != 0))
-    {
-        printf(
-            "Host: verify_evidence_and_set_public_key failed. %s\n",
-            oe_result_str(result));
-        if (ret == 0)
-            ret = 1;
-        goto exit;
-    }
-
-exit:
-    free(pem_key.buffer);
-    free(evidence.buffer);
-    free(format_settings.buffer);
-    return ret;
-}
-
 int main(int argc, const char* argv[])
 {
     oe_enclave_t* enclave_a = NULL;
@@ -209,9 +124,7 @@ int main(int argc, const char* argv[])
     oe_result_t result = OE_OK;
     int ret = 1;
     uint32_t flags = OE_ENCLAVE_FLAG_DEBUG;
-    oe_uuid_t* format_id = &sgx_remote_uuid;
-    evidence_t evidence = {0};
-    pem_key_t pem_key = {0};
+    oe_uuid_t* format_id = nullptr;
 
     /* Check argument count */
     if (argc != 4)
@@ -223,16 +136,31 @@ int main(int argc, const char* argv[])
         return 1;
     }
 
+    if (strcmp(argv[1], "sgxlocal") == 0)
+    {
+        format_id = &sgx_local_uuid;
+    }
+    else if (strcmp(argv[1], "sgxremote") == 0)
+    {
+        format_id = &sgx_remote_uuid;
+    }
+    else
+    {
+        printf("Unrecognized TEE type\n");
+        return 1;
+    }
+
     printf("Host: Creating two enclaves\n");
-    enclave_a = create_enclave("./enclave_a/enclave_a.signed", flags);
+    enclave_a = create_enclave(argv[2], flags);
     if (enclave_a == NULL)
     {
         goto exit;
     }
-
-    
-    generate_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
-    verify_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
+    enclave_b = create_enclave(argv[3], flags);
+    if (enclave_b == NULL)
+    {
+        goto exit;
+    }
 
 #ifdef __linux__
     // verify if SGX_AESM_ADDR is successfully set
@@ -246,14 +174,88 @@ int main(int argc, const char* argv[])
     }
 #endif
 
-    
+    // attest enclave A to enclave B
+    ret = attest_one_enclave_to_the_other(
+        format_id, "enclave_a", enclave_a, "enclave_b", enclave_b);
+    if (ret)
+    {
+        printf("Host: attestation failed with %d\n", ret);
+        goto exit;
+    }
+
+    // attest enclave B to enclave A
+    ret = attest_one_enclave_to_the_other(
+        format_id, "enclave_b", enclave_b, "enclave_a", enclave_a);
+    if (ret)
+    {
+        printf("Host: attestation failed with %d\n", ret);
+        goto exit;
+    }
+
+    // With successfully attestation on each other, we are ready to exchange
+    // data between enclaves, securely via asymmetric encryption
+    printf("Host: Requesting encrypted message from 1st enclave\n");
+    result = generate_encrypted_message(enclave_a, &ret, &encrypted_message);
+    if ((result != OE_OK) || (ret != 0))
+    {
+        printf(
+            "Host: generate_encrypted_message failed. %s",
+            oe_result_str(result));
+        if (ret == 0)
+            ret = 1;
+        goto exit;
+    }
+
+    printf("Host: Sending the encrypted message to 2nd enclave\n");
+    result = process_encrypted_message(enclave_b, &ret, &encrypted_message);
+    if ((result != OE_OK) || (ret != 0))
+    {
+        printf(
+            "Host: process_encrypted_message failed. %s",
+            oe_result_str(result));
+        if (ret == 0)
+            ret = 1;
+        goto exit;
+    }
+    printf(
+        "\n***\nHost: Now both enclaves have attested each other.\n"
+        "They can start exchanging messages between them \n"
+        "using asymmetric encryption with the public keys exchanged earlier\n"
+        "***\n\n");
+
+    // Free host memory allocated by the first enclave
+    free(encrypted_message.data);
+    encrypted_message.data = NULL;
+
+    printf("Host: Requesting encrypted message from 2nd enclave\n");
+    result = generate_encrypted_message(enclave_b, &ret, &encrypted_message);
+    if ((result != OE_OK) || (ret != 0))
+    {
+        printf(
+            "Host: generate_encrypted_message failed. %s",
+            oe_result_str(result));
+        if (ret == 0)
+            ret = 1;
+        goto exit;
+    }
+
+    printf("Sending encrypted message to 1st enclave=====\n");
+    result = process_encrypted_message(enclave_a, &ret, &encrypted_message);
+    if ((result != OE_OK) || (ret != 0))
+    {
+        printf(
+            "host process_encrypted_message failed. %s", oe_result_str(result));
+        if (ret == 0)
+            ret = 1;
+        goto exit;
+    }
+    printf("Host: Success\n");
 
     ret = 0;
 
 exit:
     // Free host memory allocated by the enclave.
     free(encrypted_message.data);
-    free(evidence.buffer);
 
     printf("Host: Terminating enclaves\n");
     if (enclave_a)
