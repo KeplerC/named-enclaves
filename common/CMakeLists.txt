@@ -11,7 +11,7 @@ add_custom_command(
     ${OE_INCLUDEDIR}/openenclave/edl/sgx)
 
 # Create a library common to each of our two enclaves.
-add_library(common OBJECT attestation.cpp crypto.cpp dispatcher.cpp
+add_library(common OBJECT attestation.cpp crypto.cpp dispatcher.cpp hot_msg_pass.h dispatcher.h
                           ${CMAKE_CURRENT_BINARY_DIR}/attestation_t.c)
 
 if (WIN32)

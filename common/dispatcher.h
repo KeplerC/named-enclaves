@@ -6,6 +6,7 @@
 #include <string>
 #include "attestation.h"
 #include "crypto.h"
+#include "hot_msg_pass.h"
 
 using namespace std;
 
@@ -47,6 +48,10 @@ class ecall_dispatcher
     int generate_encrypted_message(message_t* message);
 
     int process_encrypted_message(message_t* message);
+
+  int HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data );
+
+  void EnclaveMsgStartResponder( HotMsg *hotMsg );
 
   private:
     bool initialize(const char* name);

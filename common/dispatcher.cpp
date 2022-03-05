@@ -327,3 +327,85 @@ int ecall_dispatcher::process_encrypted_message(message_t* message)
 exit:
     return ret;
 }
+
+
+
+  int  ecall_dispatcher::HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ) {
+    int i = 0;
+    const uint32_t MAX_RETRIES = 10;
+    uint32_t numRetries = 0;
+    int data_index = dataID % (MAX_QUEUE_LENGTH - 1);
+
+    //Request call
+    while( true ) {
+
+        HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
+        //sgx_spin_lock( &data_ptr->spinlock );
+
+        if( data_ptr-> isRead == true ) {
+            data_ptr-> isRead  = false;
+            data_ptr->data = data;
+      
+            OcallParams *arg = (OcallParams *) data; 
+            //data_capsule_t *dc = (data_capsule_t *) arg->data; 
+
+            //Must copy to the host since we cannot pass a pointer from enclave
+            //memcpy(&data_ptr->dc, dc, sizeof(data_capsule_t));
+            //sgx_spin_unlock( &data_ptr->spinlock );
+            break;
+        }
+        //else:
+        //sgx_spin_unlock( &data_ptr->spinlock );
+
+        numRetries++;
+        // if( numRetries > MAX_RETRIES ){
+        //     printf("exceeded tries\n");
+        //     sgx_spin_unlock( &data_ptr->spinlock );
+        //     return -1;
+        // }
+
+        for( i = 0; i<3; ++i)
+            _mm_sleep();
+    }
+
+    return numRetries;
+  }
+
+  void  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
+{
+    int dataID = 0;
+
+    static int i;
+    //sgx_spin_lock(&hotMsg->spinlock );
+    hotMsg->initialized = true;  
+    //sgx_spin_unlock(&hotMsg->spinlock);
+
+      while( true )
+      {
+
+        if( hotMsg->keepPolling != true ) {
+              break;
+        }
+        
+        HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[dataID];
+        if (data_ptr == 0){
+            continue;
+        }
+
+        //sgx_spin_lock( &data_ptr->spinlock );
+
+        if(data_ptr->data){
+            //Message exists!
+            // EcallParams *arg = (EcallParams *) data_ptr->data; 
+            // data_capsule_t *dc = (data_capsule_t *) arg->data; 
+
+            data_ptr->data = 0; 
+        }
+
+        data_ptr->isRead      = true;
+        //sgx_spin_unlock( &data_ptr->spinlock );
+        dataID = (dataID + 1) % (MAX_QUEUE_LENGTH - 1);
+        for( i = 0; i<3; ++i)
+            _mm_pause();
+    }
+  }

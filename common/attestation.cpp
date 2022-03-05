@@ -62,7 +62,7 @@ bool Attestation::generate_attestation_evidence(
     oe_result_t result = OE_OK;
     uint8_t* custom_claims_buffer = nullptr;
     size_t custom_claims_buffer_size = 0;
-    char custom_claim1_name[] = "Event";
+    char custom_claim1_name[] = "Runtime Pub Key";
     char custom_claim1_value[] = "Attestation sample";
     char custom_claim2_name[] = "Public key hash";
 
