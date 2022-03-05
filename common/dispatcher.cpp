@@ -376,38 +376,39 @@ exit:
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] started");
     int dataID = 0;
 
-    // static int i;
-    // __sgx_spin_lock(&hotMsg->spinlock );
-    // hotMsg->initialized = true;  
-    // __sgx_spin_unlock(&hotMsg->spinlock);
+    static int i;
+    __sgx_spin_lock(&hotMsg->spinlock );
+    hotMsg->initialized = true;  
+    __sgx_spin_unlock(&hotMsg->spinlock);
 
-    //   while( true )
-    //   {
+      while( true )
+      {
 
-    //     if( hotMsg->keepPolling != true ) {
-    //           break;
-    //     }
+        if( hotMsg->keepPolling != true ) {
+              break;
+        }
         
-    //     HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[dataID];
-    //     if (data_ptr == 0){
-    //         continue;
-    //     }
+        HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[dataID];
+        if (data_ptr == 0){
+            continue;
+        }
 
-    //     __sgx_spin_lock( &data_ptr->spinlock );
+        __sgx_spin_lock( &data_ptr->spinlock );
 
-    //     if(data_ptr->data){
-    //         //Message exists!
-    //         EcallParams *arg = (EcallParams *) data_ptr->data; 
-    //         // data_capsule_t *dc = (data_capsule_t *) arg->data; 
-    //         TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", data_ptr->data);
-    //         data_ptr->data = 0; 
-    //     }
+        if(data_ptr->data){
+            //Message exists!
+            EcallParams *arg = (EcallParams *) data_ptr->data; 
+            // data_capsule_t *dc = (data_capsule_t *) arg->data; 
+            int* result = (int* ) arg->data;
+            TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
+            data_ptr->data = 0; 
+        }
 
-    //     data_ptr->isRead      = true;
-    //     __sgx_spin_unlock( &data_ptr->spinlock );
-    //     dataID = (dataID + 1) % (MAX_QUEUE_LENGTH - 1);
-    //     for( i = 0; i<3; ++i)
-    //         _mm_pause();
-    // }
+        data_ptr->isRead      = true;
+        __sgx_spin_unlock( &data_ptr->spinlock );
+        dataID = (dataID + 1) % (MAX_QUEUE_LENGTH - 1);
+        for( i = 0; i<3; ++i)
+            _mm_pause();
+    }
     return 0;
   }

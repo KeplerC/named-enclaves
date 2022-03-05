@@ -157,8 +157,7 @@ public:
             fprintf(stderr, ("pthread_create() failed with error #%d: '%s'\n", result, strerror(result)));
             exit(EXIT_FAILURE);
         }
-        //void** thread_return; 
-        //pthread_join(circ_buffer_enclave->responderThread, thread_return);
+
     }
 
     
@@ -171,7 +170,7 @@ public:
     void start_ecall(){
         EcallParams *args = (EcallParams *) malloc(sizeof(EcallParams));
         args->ecall_id = ECALL_PUT;
-        int         data            = 0;
+        int  data   = 250000;
         args->data = &data; 
         for( uint64_t i=0; i < 10; ++i ) {
             printf("1\n");
