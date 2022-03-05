@@ -119,8 +119,7 @@ int generate_identity_report(
         const char* attester_enclave_name,
         oe_enclave_t* attester_enclave,
         evidence_t& evidence,
-        pem_key_t& pem_key,     
-        oe_enclave_t* verifier_enclave
+        pem_key_t& pem_key
     ){
     oe_result_t result = OE_OK;
     int ret = 1;
@@ -193,8 +192,6 @@ int verify_identity_report(
     }
 
 exit:
-    free(pem_key.buffer);
-    free(evidence.buffer);
     free(format_settings.buffer);
     return ret;
 }
@@ -241,7 +238,7 @@ int main(int argc, const char* argv[])
     // }
 
     
-    generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key, enclave_b); 
+    generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key); 
         printf(
         "Host's  public key: \n%s\n",
         pem_key.buffer);
