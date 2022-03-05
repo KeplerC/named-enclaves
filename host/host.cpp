@@ -107,7 +107,7 @@ int verify_identity_report(
         "Host: verify_evidence_and_set_public_key in %s\n",
         verifier_enclave_name);
     result = verify_evidence_and_set_public_key(
-        verifier_enclave, &ret, format_id, &pem_key, &evidence);
+        verifier_enclave, &ret, format_id, &pem_key, &evidence, &pem_key);
     if ((result != OE_OK) || (ret != 0))
     {
         printf(
@@ -279,9 +279,6 @@ int main(int argc, const char* argv[])
 
 
     generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key); 
-        printf(
-        "Host's  public key: \n%s\n",
-        pem_key.buffer);
 
     verify_identity_report(format_id, "enclave_b", enclave_b, evidence, pem_key); 
 

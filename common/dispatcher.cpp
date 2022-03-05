@@ -36,7 +36,7 @@ bool ecall_dispatcher::initialize(const char* name)
         goto exit;
     }
 
-    m_attestation = new Attestation(m_crypto, m_enclave_config->other_enclave_public_key_pem, m_enclave_config->other_enclave_public_key_pem_size);
+    m_attestation = new Attestation(m_crypto);
     if (m_attestation == nullptr)
     {
         goto exit;
@@ -184,10 +184,13 @@ exit:
     return ret;
 }
 
-int ecall_dispatcher::verify_evidence_and_set_public_key(
+int ecall_dispatcher::verify_evidence_with_public_key(
     const oe_uuid_t* format_id,
     pem_key_t* pem_key,
-    evidence_t* evidence)
+    evidence_t* evidence,
+    const char* other_enclave_claimed_public_key_pem, 
+    size_t other_enclave_claimed_public_key_pem_size
+    )
 {
     int ret = 1;
 
@@ -203,7 +206,9 @@ int ecall_dispatcher::verify_evidence_and_set_public_key(
             evidence->buffer,
             evidence->size,
             pem_key->buffer,
-            pem_key->size) == false)
+            pem_key->size, 
+            other_enclave_claimed_public_key_pem, 
+            other_enclave_claimed_public_key_pem_size) == false)
     {
         TRACE_ENCLAVE("verify_evidence_and_set_public_key failed.");
         goto exit;
@@ -215,7 +220,6 @@ int ecall_dispatcher::verify_evidence_and_set_public_key(
     //     pem_key->size);
 
     ret = 0;
-    TRACE_ENCLAVE("verify_evidence_and_set_public_key succeeded.");
 
 exit:
     return ret;

@@ -13,8 +13,8 @@ using namespace std;
 typedef struct _enclave_config_data
 {
     uint8_t* enclave_secret_data;
-    const char* other_enclave_public_key_pem;
-    size_t other_enclave_public_key_pem_size;
+    //const char* other_enclave_public_key_pem;
+    //size_t other_enclave_public_key_pem_size;
 } enclave_config_data_t;
 
 class ecall_dispatcher
@@ -43,10 +43,12 @@ class ecall_dispatcher
         pem_key_t* pem_key,
         evidence_t* evidence);
 
-    int verify_evidence_and_set_public_key(
+    int verify_evidence_with_public_key(
         const oe_uuid_t* format_id,
         pem_key_t* pem_key,
-        evidence_t* evidence);
+        evidence_t* evidence,
+        const char* other_enclave_claimed_public_key_pem, 
+        size_t other_enclave_claimed_public_key_pem_size);
 
     int generate_encrypted_message(message_t* message, pem_key_t* other_enclave_pem_key);
 

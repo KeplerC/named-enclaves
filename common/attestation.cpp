@@ -11,24 +11,10 @@
 #include "log.h"
 
 Attestation::Attestation(
-    Crypto* crypto,     
-    const char* other_enclave_public_key_pem, 
-    size_t other_enclave_public_key_pem_size)
+    Crypto* crypto 
+)
 {
     m_crypto = crypto;
-
-    {
-        size_t other_enclave_signer_id_size = sizeof(m_enclave_signer_id);
-        // TODO: the following call is not TEE-agnostic.
-        if (oe_sgx_get_signer_id_from_public_key(
-                other_enclave_public_key_pem,
-                other_enclave_public_key_pem_size,
-                m_enclave_signer_id,
-                &other_enclave_signer_id_size) != OE_OK)
-        {
-            printf("Error in creating attestation signer id");
-        }
-    }
 }
 
 /**
@@ -181,7 +167,10 @@ bool Attestation::attest_attestation_evidence(
     const uint8_t* evidence,
     size_t evidence_size,
     const uint8_t* data,
-    size_t data_size)
+    size_t data_size, 
+    const char* other_enclave_claimed_public_key_pem, 
+    size_t other_enclave_claimed_public_key_pem_size
+    )
 {
     bool ret = false;
     uint8_t hash[32];
@@ -230,6 +219,25 @@ bool Attestation::attest_attestation_evidence(
     }
 
     TRACE_ENCLAVE("oe_verify_evidence succeeded");
+
+
+    // Calculate expected signer id
+
+    {
+        size_t other_enclave_signer_id_size = sizeof(m_enclave_signer_id);
+        // TODO: the following call is not TEE-agnostic.
+        if (oe_sgx_get_signer_id_from_public_key(
+                other_enclave_claimed_public_key_pem,
+                other_enclave_claimed_public_key_pem_size,
+                m_enclave_signer_id,
+                &other_enclave_signer_id_size) != OE_OK)
+        {
+            printf("Error in creating attestation signer id");
+        }
+    }
+
+
+
 
     // 2) validate the enclave identity's signer_id is the hash of the public
     // signing key that was used to sign an enclave. Check that the enclave was

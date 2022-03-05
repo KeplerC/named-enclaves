@@ -50,7 +50,8 @@ enclave {
         public int verify_evidence_and_set_public_key(
             [in] const oe_uuid_t* format_id,
             [in] pem_key_t *pem_key,
-            [in] evidence_t *evidence);
+            [in] evidence_t *evidence, 
+            [in] pem_key_t *claimed_pem_key);
 
         // Encrypt message for another enclave using the public key stored for it
         public int generate_encrypted_message(

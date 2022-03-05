@@ -17,9 +17,7 @@ class Attestation
     uint8_t m_enclave_signer_id[32];
 
   public:
-    Attestation(Crypto* crypto, 
-          const char* other_enclave_public_key_pem, 
-          size_t other_enclave_public_key_pem_size);
+    Attestation(Crypto* crypto);
 
     // Get format settings.
     bool get_format_settings(
@@ -49,7 +47,9 @@ class Attestation
         const uint8_t* evidence,
         size_t evidence_size,
         const uint8_t* data,
-        size_t data_size);
+        size_t data_size, 
+        const char* other_enclave_claimed_public_key_pem, 
+        size_t other_enclave_claimed_public_key_pem_size);
 };
 
 #endif // OE_SAMPLES_ATTESTATION_ENC_ATTESTATION_H
