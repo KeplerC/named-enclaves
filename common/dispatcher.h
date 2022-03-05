@@ -51,7 +51,7 @@ class ecall_dispatcher
 
   int HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data );
 
-  void EnclaveMsgStartResponder( HotMsg *hotMsg );
+  int EnclaveMsgStartResponder( HotMsg *hotMsg );
 
   private:
     bool initialize(const char* name);

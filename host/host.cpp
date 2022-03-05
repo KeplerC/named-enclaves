@@ -19,7 +19,7 @@ oe_enclave_t* create_enclave(const char* enclave_path, uint32_t flags)
 
     printf("Host: Enclave library %s\n", enclave_path);
     oe_result_t result = oe_create_attestation_enclave(
-        enclave_path, OE_ENCLAVE_TYPE_AUTO, flags, NULL, 0, &enclave);
+        enclave_path, OE_ENCLAVE_TYPE_SGX, flags, NULL, 0, &enclave);
 
     if (result != OE_OK)
     {
@@ -132,7 +132,8 @@ struct enclave_responder_args {
 
 static void* thread_run_ecall_responder(void* hotMsgAsVoidP){
     struct enclave_responder_args *args = (struct enclave_responder_args *) hotMsgAsVoidP;
-    EnclaveMsgStartResponder(args->client,  args->hotMsg);
+    int ret = 0;
+    EnclaveMsgStartResponder(args->client,  &ret, args->hotMsg);
     return NULL;
 }
 
@@ -149,7 +150,7 @@ public:
 
         //start ecall responder
         //first argument this->client
-        struct enclave_responder_args e_responder_args = {m_enclave, circ_buffer_enclave};
+        e_responder_args = {m_enclave, circ_buffer_enclave};
         int result = pthread_create(&circ_buffer_enclave->responderThread, NULL, thread_run_ecall_responder, (void*)&e_responder_args );
         if (0 != result)
         {
@@ -188,6 +189,7 @@ private:
     HotMsg *circ_buffer_host; 
     uint16_t requestedCallID = 0;
     oe_enclave_t* m_enclave; 
+    struct enclave_responder_args e_responder_args;
 };
 
 
@@ -202,16 +204,6 @@ int main(int argc, const char* argv[])
     oe_uuid_t* format_id = &sgx_remote_uuid;
     evidence_t evidence = {0};
     pem_key_t pem_key = {0};
-
-    /* Check argument count */
-    if (argc != 4)
-    {
-        printf("Usage: %s <tee> ENCLAVE_PATH1 ENCLAVE_PATH2\n", argv[0]);
-        printf("       where <tee> is one of:\n");
-        printf("           sgxlocal  : for SGX local attestation\n");
-        printf("           sgxremote : for SGX remote attestation\n");
-        return 1;
-    }
 
     printf("Host: Creating two enclaves\n");
     enclave_a = create_enclave("./enclave/enclave_a.signed", flags);

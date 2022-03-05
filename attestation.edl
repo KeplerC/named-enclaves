@@ -64,7 +64,7 @@ enclave {
             int dataID, 
             [user_check]void *data ); 
 
-        public void EnclaveMsgStartResponder( 
+        public int EnclaveMsgStartResponder( 
             [user_check]HotMsg *hotMsg 
         ); 
 

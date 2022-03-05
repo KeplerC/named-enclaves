@@ -371,7 +371,7 @@ exit:
     return numRetries;
   }
 
-  void  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
+  int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] started");
     int dataID = 0;
@@ -409,4 +409,5 @@ exit:
     //     for( i = 0; i<3; ++i)
     //         _mm_pause();
     // }
+    return 0;
   }
