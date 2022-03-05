@@ -222,10 +222,10 @@ int ecall_dispatcher::verify_evidence_and_set_public_key(
         goto exit;
     }
 
-    memcpy(
-        m_crypto->get_the_other_enclave_public_key(),
-        pem_key->buffer,
-        pem_key->size);
+    // memcpy(
+    //     m_crypto->get_the_other_enclave_public_key(),
+    //     pem_key->buffer,
+    //     pem_key->size);
 
     ret = 0;
     TRACE_ENCLAVE("verify_evidence_and_set_public_key succeeded.");
@@ -234,7 +234,10 @@ exit:
     return ret;
 }
 
-int ecall_dispatcher::generate_encrypted_message(message_t* message)
+int ecall_dispatcher::generate_encrypted_message(
+    message_t* message, 
+    pem_key_t* other_enclave_pem_key
+    )
 {
     uint8_t encrypted_data_buffer[1024];
     size_t encrypted_data_size;
@@ -249,7 +252,7 @@ int ecall_dispatcher::generate_encrypted_message(message_t* message)
 
     encrypted_data_size = sizeof(encrypted_data_buffer);
     if (m_crypto->Encrypt(
-            m_crypto->get_the_other_enclave_public_key(),
+            other_enclave_pem_key->buffer,
             m_enclave_config->enclave_secret_data,
             ENCLAVE_SECRET_DATA_SIZE,
             encrypted_data_buffer,

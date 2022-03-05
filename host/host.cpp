@@ -263,36 +263,27 @@ int main(int argc, const char* argv[])
 
     printf("Host: Creating two enclaves\n");
     enclave_a = create_enclave("./enclave/enclave_a.signed", flags);
-    // if (enclave_a == NULL)
-    // {
-    //     goto exit;
-    // }
+    if (enclave_a == NULL)
+    {
+        printf("Enclave creation failed!\n");
+    }
     enclave_b = create_enclave("./enclave/enclave_a.signed", flags);
-    // if (enclave_b == NULL)
-    // {
-    //     goto exit;
-    // }
+    if (enclave_b == NULL)
+    {
+        printf("Enclave creation failed!\n");
+    }
     
-    // ret = attest_one_enclave_to_the_other(
-    // format_id, "enclave_a", enclave_a, "enclave_b", enclave_b);
-    // if (ret)
-    // {
-    //     printf("Host: attestation failed with %d\n", ret);
-    //     goto exit;
-    // }
+
     auto ee = Enclave_Entity(enclave_a);
     ee.start_ecall();
 
-    // pthread_create(&hotEcall.responderThread, NULL, EnclaveResponderThread, (void*)&hotEcall);
 
-    
-    // generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key); 
-    //     printf(
-    //     "Host's  public key: \n%s\n",
-    //     pem_key.buffer);
+    generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key); 
+        printf(
+        "Host's  public key: \n%s\n",
+        pem_key.buffer);
 
-    // verify_identity_report(format_id, "enclave_b", enclave_b, evidence, pem_key); 
-    // // printf("Verification succeeds!\n");
+    verify_identity_report(format_id, "enclave_b", enclave_b, evidence, pem_key); 
 
 
 #ifdef __linux__

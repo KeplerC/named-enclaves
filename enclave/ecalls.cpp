@@ -63,9 +63,9 @@ int verify_evidence_and_set_public_key(
 }
 
 // Encrypt message for another enclave using the public key stored for it.
-int generate_encrypted_message(message_t* message)
+int generate_encrypted_message(message_t* message, pem_key_t* other_enclave_pem_key)
 {
-    return dispatcher.generate_encrypted_message(message);
+    return dispatcher.generate_encrypted_message(message, other_enclave_pem_key);
 }
 
 // Process encrypted message

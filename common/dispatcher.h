@@ -48,7 +48,7 @@ class ecall_dispatcher
         pem_key_t* pem_key,
         evidence_t* evidence);
 
-    int generate_encrypted_message(message_t* message);
+    int generate_encrypted_message(message_t* message, pem_key_t* other_enclave_pem_key);
 
     int process_encrypted_message(message_t* message);
 

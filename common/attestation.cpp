@@ -63,7 +63,8 @@ bool Attestation::generate_attestation_evidence(
     uint8_t* custom_claims_buffer = nullptr;
     size_t custom_claims_buffer_size = 0;
     char custom_claim1_name[] = "Runtime Pub Key";
-    char custom_claim1_value[] = "Attestation sample";
+    uint8_t custom_claim1_value[512];
+    this->m_crypto->retrieve_public_key(custom_claim1_value);
     char custom_claim2_name[] = "Public key hash";
 
     // The custom_claims[1].value will be filled with hash of public key later

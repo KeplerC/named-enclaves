@@ -53,7 +53,10 @@ enclave {
             [in] evidence_t *evidence);
 
         // Encrypt message for another enclave using the public key stored for it
-        public int generate_encrypted_message([out] message_t* message);
+        public int generate_encrypted_message(
+            [out] message_t* message, 
+            [in] pem_key_t* other_enclave_pem_key
+        );
 
         // Process encrypted message
         public int process_encrypted_message([in] message_t* message);

@@ -28,7 +28,7 @@ class Crypto
     bool m_initialized;
 
     // Public key of another enclave.
-    uint8_t m_other_enclave_pubkey[PUBLIC_KEY_SIZE];
+    // uint8_t m_other_enclave_pubkey[PUBLIC_KEY_SIZE];
 
   public:
     Crypto();
@@ -61,10 +61,10 @@ class Crypto
         size_t* data_size);
 
     // Public key of another enclave.
-    uint8_t* get_the_other_enclave_public_key()
-    {
-        return m_other_enclave_pubkey;
-    }
+    // uint8_t* get_the_other_enclave_public_key()
+    // {
+    //     return m_other_enclave_pubkey;
+    // }
 
     /**
      * Compute the sha256 hash of given data.
