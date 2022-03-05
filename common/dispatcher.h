@@ -27,6 +27,9 @@ class ecall_dispatcher
     enclave_config_data_t* m_enclave_config;
     unsigned char m_other_enclave_signer_id[32];
 
+    HotMsg *ocall_circular_buffer;
+    uint16_t requestedCallID = 0;
+
   public:
     ecall_dispatcher(const char* name, enclave_config_data_t* enclave_config);
     ~ecall_dispatcher();
@@ -49,10 +52,19 @@ class ecall_dispatcher
 
     int process_encrypted_message(message_t* message);
 
-  int HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data );
+    int EnclaveMsgStartResponder( HotMsg *hotMsg );
 
-  int EnclaveMsgStartResponder( HotMsg *hotMsg );
+    int SetOcallBuffer( HotMsg *hotMsg ){
+      ocall_circular_buffer = hotMsg;
+      return 0;
+    }
+
+    void put_ocall();
 
   private:
     bool initialize(const char* name);
+
+    int HotMsg_requestOCall( HotMsg* hotMsg, 
+      int dataID, 
+      void *data );
 };

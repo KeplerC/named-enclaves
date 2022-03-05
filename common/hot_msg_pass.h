@@ -112,12 +112,14 @@ static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
             data_ptr-> isRead  = false;
             data_ptr->data = data;
             // data_capsule_t *clarg = (data_capsule_t *) data; 
-            // printf("[HotMsg_requestCall] data id: %d\n", arg->id);
+            EcallParams * args = (EcallParams*) data;
+            int* result = (int*)args->data; 
+            printf("[HotMsg_requestCall] data is: %d\n", *result);
             __sgx_spin_unlock( &data_ptr->spinlock );
             break;
         }
         //else:
-        //sgx_spin_unlock( &data_ptr->spinlock );
+        __sgx_spin_unlock( &data_ptr->spinlock );
 
         numRetries++;
         if( numRetries > MAX_RETRIES ){

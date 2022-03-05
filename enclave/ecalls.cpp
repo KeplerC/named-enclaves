@@ -75,8 +75,8 @@ int process_encrypted_message(message_t* message)
 }
 
 
-int HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ){
-    return dispatcher.HotMsg_requestOCall( hotMsg, dataID, data );
+int SetOcallBuffer( HotMsg *hotMsg ){
+    return dispatcher.SetOcallBuffer(hotMsg);
 }
 
 int EnclaveMsgStartResponder( HotMsg *hotMsg ){

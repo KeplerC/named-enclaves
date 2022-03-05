@@ -57,12 +57,10 @@ enclave {
 
         // Process encrypted message
         public int process_encrypted_message([in] message_t* message);
-
-
-        public int HotMsg_requestOCall( 
-            [user_check] HotMsg* hotMsg, 
-            int dataID, 
-            [user_check]void *data ); 
+        
+        public int SetOcallBuffer( 
+            [user_check]HotMsg *hotMsg 
+        ); 
 
         public int EnclaveMsgStartResponder( 
             [user_check]HotMsg *hotMsg 

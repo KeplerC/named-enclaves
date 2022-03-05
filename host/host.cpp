@@ -137,6 +137,55 @@ static void* thread_run_ecall_responder(void* hotMsgAsVoidP){
     return NULL;
 }
 
+
+static void *StartOcallResponder( void *arg ) {
+
+    HotMsg *hotMsg = (HotMsg *) arg;
+
+    int dataID = 0;
+
+    static int i;
+    __sgx_spin_lock(&hotMsg->spinlock );
+    hotMsg->initialized = true;  
+    __sgx_spin_unlock(&hotMsg->spinlock);
+
+    while( true )
+    {
+      if( hotMsg->keepPolling != true ) {
+            break;
+      }
+      
+      HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[dataID];
+      if (data_ptr == 0){
+          continue;
+      }
+
+      __sgx_spin_lock( &data_ptr->spinlock );
+
+      if(data_ptr->data){
+          //Message exists!
+          OcallParams *arg = (OcallParams *) data_ptr->data; 
+          //data_capsule_t *dc = &data_ptr->dc; 
+
+          switch(data_ptr->ocall_id){
+            case OCALL_PUT:
+              //printf("[OCALL] dc_id : %d\n", dc->id);
+              break;
+            default:
+              printf("Invalid ECALL id: %d\n", arg->ocall_id);
+          }
+          data_ptr->data = 0; 
+      }
+
+      data_ptr->isRead      = true;
+      __sgx_spin_unlock( &data_ptr->spinlock );
+      dataID = (dataID + 1) % (MAX_QUEUE_LENGTH - 1);
+      for( i = 0; i<3; ++i)
+          _mm_pause();
+  }
+}
+
+
 class Enclave_Entity{
 public:
     Enclave_Entity(oe_enclave_t* enclave){
@@ -158,6 +207,13 @@ public:
             exit(EXIT_FAILURE);
         }
 
+        SetOcallBuffer(m_enclave, &result, circ_buffer_host);
+        result = pthread_create(&circ_buffer_host->responderThread, NULL, StartOcallResponder, (void*) circ_buffer_host);
+        if (0 != result)
+        {
+            fprintf(stderr, ("pthread_create() failed with error #%d: '%s'\n", result, strerror(result)));
+            exit(EXIT_FAILURE);
+        }
     }
 
     
@@ -169,11 +225,12 @@ public:
 
     void start_ecall(){
         EcallParams *args = (EcallParams *) malloc(sizeof(EcallParams));
+        int *data = (int *) malloc(sizeof(int));
         args->ecall_id = ECALL_PUT;
-        int  data   = 250000;
-        args->data = &data; 
+        *data   = 250000;
+        args->data = data; 
         for( uint64_t i=0; i < 10; ++i ) {
-            printf("1\n");
+            printf("[start_ecall] id is: %d\n",requestedCallID);
             HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args );
         }
     }

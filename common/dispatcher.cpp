@@ -330,46 +330,54 @@ exit:
 
 
 
-  int  ecall_dispatcher::HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ) {
-    int i = 0;
-    const uint32_t MAX_RETRIES = 10;
-    uint32_t numRetries = 0;
-    int data_index = dataID % (MAX_QUEUE_LENGTH - 1);
+    int  ecall_dispatcher::HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ) {
+        int i = 0;
+        const uint32_t MAX_RETRIES = 10;
+        uint32_t numRetries = 0;
+        int data_index = dataID % (MAX_QUEUE_LENGTH - 1);
 
-    //Request call
-    while( true ) {
+        //Request call
+        while( true ) {
 
-        HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
-        __sgx_spin_lock( &data_ptr->spinlock );
+            HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
+            __sgx_spin_lock( &data_ptr->spinlock );
 
-        if( data_ptr-> isRead == true ) {
-            data_ptr-> isRead  = false;
-            data_ptr->data = data;
-      
-            OcallParams *arg = (OcallParams *) data; 
-            //data_capsule_t *dc = (data_capsule_t *) arg->data; 
+            if( data_ptr-> isRead == true ) {
+                data_ptr-> isRead  = false;
+                data_ptr->data = data;
+        
+                OcallParams *arg = (OcallParams *) data; 
+                //data_capsule_t *dc = (data_capsule_t *) arg->data; 
 
-            //Must copy to the host since we cannot pass a pointer from enclave
-            //memcpy(&data_ptr->dc, dc, sizeof(data_capsule_t));
-            __sgx_spin_unlock( &data_ptr->spinlock );
-            break;
+                //Must copy to the host since we cannot pass a pointer from enclave
+                //memcpy(&data_ptr->dc, dc, sizeof(data_capsule_t));
+                __sgx_spin_unlock( &data_ptr->spinlock );
+                break;
+            }
+            //else:
+            //sgx_spin_unlock( &data_ptr->spinlock );
+
+            numRetries++;
+            // if( numRetries > MAX_RETRIES ){
+            //     printf("exceeded tries\n");
+            //     sgx_spin_unlock( &data_ptr->spinlock );
+            //     return -1;
+            // }
+
+            for( i = 0; i<3; ++i)
+                _mm_sleep();
         }
-        //else:
-        //sgx_spin_unlock( &data_ptr->spinlock );
 
-        numRetries++;
-        // if( numRetries > MAX_RETRIES ){
-        //     printf("exceeded tries\n");
-        //     sgx_spin_unlock( &data_ptr->spinlock );
-        //     return -1;
-        // }
-
-        for( i = 0; i<3; ++i)
-            _mm_sleep();
+        return numRetries;
     }
 
-    return numRetries;
-  }
+
+    void ecall_dispatcher::put_ocall(){
+      OcallParams args;
+      args.ocall_id = OCALL_PUT;
+      args.data = 0; 
+      HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, &args);
+    }
 
   int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {
@@ -397,10 +405,12 @@ exit:
 
         if(data_ptr->data){
             //Message exists!
-            EcallParams *arg = (EcallParams *) data_ptr->data; 
-            // data_capsule_t *dc = (data_capsule_t *) arg->data; 
-            int* result = (int* ) arg->data;
-            TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
+            EcallParams * args = (EcallParams*) data_ptr->data;
+            int* result = (int*)args->data; 
+            printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
+            printf("[EnclaveMsgStartResponder] data is: %d\n", *result);
+            //TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
+            //put_ocall();
             data_ptr->data = 0; 
         }
 
