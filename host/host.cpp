@@ -119,15 +119,16 @@ int generate_identity_report(
         const char* attester_enclave_name,
         oe_enclave_t* attester_enclave,
         evidence_t& evidence,
-        pem_key_t& pem_key
+        pem_key_t& pem_key,     
+        oe_enclave_t* verifier_enclave
     ){
     oe_result_t result = OE_OK;
     int ret = 1;
     format_settings_t format_settings = {0};
     
     printf("Use its own format setting\n");
-    result = get_enclave_format_settings(
-        attester_enclave, &ret, format_id, &format_settings);
+    result = get_enclave_format_settings(attester_enclave, &ret, format_id, &format_settings);
+
     if ((result != OE_OK) || (ret != 0))
     {
         printf("Host: get_format_settings failed. %s\n", oe_result_str(result));
@@ -173,6 +174,8 @@ int verify_identity_report(
     oe_result_t result = OE_OK;
     int ret = 1;
     format_settings_t format_settings = {0};
+    get_enclave_format_settings(verifier_enclave, &ret, format_id, &format_settings);
+
 
     printf(
         "Host: verify_evidence_and_set_public_key in %s\n",
@@ -224,23 +227,27 @@ int main(int argc, const char* argv[])
     {
         goto exit;
     }
-
-    ret = attest_one_enclave_to_the_other(
-    format_id, "enclave_a", enclave_a, "enclave_a", enclave_a);
-    if (ret)
+    enclave_b = create_enclave("./enclave_a/enclave_a.signed", flags);
+    if (enclave_b == NULL)
     {
-        printf("Host: attestation failed with %d\n", ret);
         goto exit;
     }
+    // ret = attest_one_enclave_to_the_other(
+    // format_id, "enclave_a", enclave_a, "enclave_b", enclave_b);
+    // if (ret)
+    // {
+    //     printf("Host: attestation failed with %d\n", ret);
+    //     goto exit;
+    // }
 
     
-    // generate_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
-    //     printf(
-    //     "Host's  public key: \n%s\n",
-    //     pem_key.buffer);
+    generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key, enclave_b); 
+        printf(
+        "Host's  public key: \n%s\n",
+        pem_key.buffer);
 
-    // verify_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
-
+    verify_identity_report(format_id, "enclave_b", enclave_b, evidence, pem_key); 
+    printf("Verification succeeds!\n");
 #ifdef __linux__
     // verify if SGX_AESM_ADDR is successfully set
     if (getenv("SGX_AESM_ADDR"))
