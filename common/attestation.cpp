@@ -6,13 +6,29 @@
 #include <openenclave/attestation/custom_claims.h>
 #include <openenclave/attestation/verifier.h>
 #include <openenclave/bits/report.h>
+#include <openenclave/attestation/sgx/report.h>
 #include <string.h>
 #include "log.h"
 
-Attestation::Attestation(Crypto* crypto, uint8_t* enclave_signer_id)
+Attestation::Attestation(
+    Crypto* crypto,     
+    const char* other_enclave_public_key_pem, 
+    size_t other_enclave_public_key_pem_size)
 {
     m_crypto = crypto;
-    m_enclave_signer_id = enclave_signer_id;
+
+    {
+        size_t other_enclave_signer_id_size = sizeof(m_enclave_signer_id);
+        // TODO: the following call is not TEE-agnostic.
+        if (oe_sgx_get_signer_id_from_public_key(
+                other_enclave_public_key_pem,
+                other_enclave_public_key_pem_size,
+                m_enclave_signer_id,
+                &other_enclave_signer_id_size) != OE_OK)
+        {
+            printf("Error in creating attestation signer id");
+        }
+    }
 }
 
 /**

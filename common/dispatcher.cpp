@@ -36,20 +36,7 @@ bool ecall_dispatcher::initialize(const char* name)
         goto exit;
     }
 
-    {
-        size_t other_enclave_signer_id_size = sizeof(m_other_enclave_signer_id);
-        // TODO: the following call is not TEE-agnostic.
-        if (oe_sgx_get_signer_id_from_public_key(
-                m_enclave_config->other_enclave_public_key_pem,
-                m_enclave_config->other_enclave_public_key_pem_size,
-                m_other_enclave_signer_id,
-                &other_enclave_signer_id_size) != OE_OK)
-        {
-            goto exit;
-        }
-    }
-
-    m_attestation = new Attestation(m_crypto, m_other_enclave_signer_id);
+    m_attestation = new Attestation(m_crypto, m_enclave_config->other_enclave_public_key_pem, m_enclave_config->other_enclave_public_key_pem_size);
     if (m_attestation == nullptr)
     {
         goto exit;

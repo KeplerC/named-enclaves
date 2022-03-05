@@ -14,10 +14,12 @@ class Attestation
 {
   private:
     Crypto* m_crypto;
-    uint8_t* m_enclave_signer_id;
+    uint8_t m_enclave_signer_id[32];
 
   public:
-    Attestation(Crypto* crypto, uint8_t* enclave_signer_id);
+    Attestation(Crypto* crypto, 
+          const char* other_enclave_public_key_pem, 
+          size_t other_enclave_public_key_pem_size);
 
     // Get format settings.
     bool get_format_settings(

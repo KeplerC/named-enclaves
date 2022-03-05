@@ -25,7 +25,7 @@ class ecall_dispatcher
     Attestation* m_attestation;
     string m_name;
     enclave_config_data_t* m_enclave_config;
-    unsigned char m_other_enclave_signer_id[32];
+    //unsigned char m_other_enclave_signer_id[32];
 
     HotMsg *ocall_circular_buffer;
     uint16_t requestedCallID = 0;
