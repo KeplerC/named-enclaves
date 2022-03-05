@@ -73,3 +73,12 @@ int process_encrypted_message(message_t* message)
 {
     return dispatcher.process_encrypted_message(message);
 }
+
+
+int HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ){
+    return dispatcher.HotMsg_requestOCall( hotMsg, dataID, data );
+}
+
+void EnclaveMsgStartResponder( HotMsg *hotMsg ){
+    return dispatcher.EnclaveMsgStartResponder(hotMsg);
+}
