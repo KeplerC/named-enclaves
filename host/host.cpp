@@ -219,12 +219,12 @@ int main(int argc, const char* argv[])
     }
 
     printf("Host: Creating two enclaves\n");
-    enclave_a = create_enclave("./enclave_a/enclave_a.signed", flags);
+    enclave_a = create_enclave("./enclave/enclave_a.signed", flags);
     if (enclave_a == NULL)
     {
         goto exit;
     }
-    enclave_b = create_enclave("./enclave_a/enclave_a.signed", flags);
+    enclave_b = create_enclave("./enclave/enclave_a.signed", flags);
     if (enclave_b == NULL)
     {
         goto exit;
