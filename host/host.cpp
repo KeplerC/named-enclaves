@@ -118,8 +118,8 @@ int generate_identity_report(
         const oe_uuid_t* format_id,
         const char* attester_enclave_name,
         oe_enclave_t* attester_enclave,
-        evidence_t evidence,
-        pem_key_t pem_key
+        evidence_t& evidence,
+        pem_key_t& pem_key
     ){
     oe_result_t result = OE_OK;
     int ret = 1;
@@ -157,11 +157,6 @@ int generate_identity_report(
             ret = 1;
         goto exit;
     }
-
-    printf(
-        "Host: %s's  public key: \n%s\n",
-        attester_enclave_name,
-        pem_key.buffer);
 
 exit:
     free(format_settings.buffer);
@@ -230,9 +225,21 @@ int main(int argc, const char* argv[])
         goto exit;
     }
 
+    ret = attest_one_enclave_to_the_other(
+    format_id, "enclave_a", enclave_a, "enclave_a", enclave_a);
+    if (ret)
+    {
+        printf("Host: attestation failed with %d\n", ret);
+        goto exit;
+    }
+
     
-    generate_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
-    verify_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
+    // generate_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
+    //     printf(
+    //     "Host's  public key: \n%s\n",
+    //     pem_key.buffer);
+
+    // verify_identity_report(format_id, "my_enclave", enclave_a, evidence, pem_key); 
 
 #ifdef __linux__
     // verify if SGX_AESM_ADDR is successfully set

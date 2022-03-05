@@ -175,9 +175,19 @@ bool Attestation::attest_attestation_evidence(
     oe_claim_t* custom_claims = nullptr;
     size_t custom_claims_length = 0;
 
+
+    uint8_t* evidence_buffer = (uint8_t*)malloc(evidence_size);
+    if (evidence_buffer == nullptr)
+    {
+        ret = OE_OUT_OF_MEMORY;
+        TRACE_ENCLAVE("copying evidence_buffer failed, out of memory");
+        goto exit;
+    }
+    memcpy(evidence_buffer, evidence, evidence_size);
+
     // While attesting, the evidence being attested must not be tampered
     // with. Ensure that it has been copied over to the enclave.
-    if (!oe_is_within_enclave(evidence, evidence_size))
+    if (!oe_is_within_enclave(evidence_buffer, evidence_size))
     {
         TRACE_ENCLAVE("Cannot attest evidence in host memory. Unsafe.");
         goto exit;
@@ -187,7 +197,7 @@ bool Attestation::attest_attestation_evidence(
     // Verify the evidence to ensure its authenticity.
     result = oe_verify_evidence(
         format_id,
-        evidence,
+        evidence_buffer,
         evidence_size,
         nullptr,
         0,
