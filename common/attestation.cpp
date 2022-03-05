@@ -232,26 +232,26 @@ bool Attestation::attest_attestation_evidence(
         goto exit;
     }
 
-    // if (memcmp(claim->value, m_enclave_signer_id, OE_SIGNER_ID_SIZE) != 0)
-    // {
-    //     TRACE_ENCLAVE("signer_id checking failed");
+    if (memcmp(claim->value, m_enclave_signer_id, OE_SIGNER_ID_SIZE) != 0)
+    {
+        TRACE_ENCLAVE("signer_id checking failed");
 
-    //     for (int j = 0; j < OE_SIGNER_ID_SIZE; j++)
-    //     {
-    //         TRACE_ENCLAVE(
-    //             "m_enclave_signer_id[%d]=0x%0x",
-    //             j,
-    //             (uint8_t)m_enclave_signer_id[j]);
-    //     }
+        for (int j = 0; j < OE_SIGNER_ID_SIZE; j++)
+        {
+            TRACE_ENCLAVE(
+                "m_enclave_signer_id[%d]=0x%0x",
+                j,
+                (uint8_t)m_enclave_signer_id[j]);
+        }
 
-    //     TRACE_ENCLAVE("\n");
+        TRACE_ENCLAVE("\n");
 
-    //     for (int j = 0; j < OE_SIGNER_ID_SIZE; j++)
-    //     {
-    //         TRACE_ENCLAVE("signer_id[%d]=0x%0x", j, (uint8_t)claim->value[j]);
-    //     }
-    //     goto exit;
-    // }
+        for (int j = 0; j < OE_SIGNER_ID_SIZE; j++)
+        {
+            TRACE_ENCLAVE("signer_id[%d]=0x%0x", j, (uint8_t)claim->value[j]);
+        }
+        goto exit;
+    }
 
     // Check the enclave's product id.
     if ((claim = _find_claim(claims, claims_length, OE_CLAIM_PRODUCT_ID)) ==
