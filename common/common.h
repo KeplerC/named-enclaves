@@ -24,8 +24,8 @@
 
 #ifndef __COMMON_H
 #define __COMMON_H
-
-#include "sgx_spinlock.h"
+typedef volatile uint32_t sgx_spinlock_t;
+typedef unsigned long int pthread_t;
 
 enum OCALL_ID {
     OCALL_PUT,

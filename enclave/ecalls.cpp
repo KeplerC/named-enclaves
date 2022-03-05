@@ -80,5 +80,6 @@ int HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ){
 }
 
 void EnclaveMsgStartResponder( HotMsg *hotMsg ){
+    TRACE_ENCLAVE("[EnclaveMsgStartResponder] call to dispatcher");
     return dispatcher.EnclaveMsgStartResponder(hotMsg);
 }

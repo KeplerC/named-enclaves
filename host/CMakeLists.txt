@@ -14,7 +14,8 @@ add_executable(attestation_host
 target_include_directories(
   attestation_host
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ # For common/shared.h
-          ${CMAKE_CURRENT_BINARY_DIR})
+          ${CMAKE_CURRENT_BINARY_DIR}
+          ${CMAKE_CURRENT_SOURCE_DIR}/../common)
 
 if (WIN32)
   add_dcap_client_target(attestation_dcap_target)

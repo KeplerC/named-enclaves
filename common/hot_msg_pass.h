@@ -29,7 +29,7 @@
 
 #include <stdbool.h>
 #include "common.h"
-
+typedef volatile uint32_t sgx_spinlock_t;
 #pragma GCC diagnostic ignored "-Wunused-function"
 #define MAX_QUEUE_LENGTH 1000
 
@@ -59,6 +59,42 @@ static inline void _mm_sleep(void)
 }
 
 
+static inline int _InterlockedExchange(int volatile * dst, int val)
+{
+    int res;
+
+    __asm __volatile(
+        "lock xchg %2, %1;"
+        "mov %2, %0"
+        : "=m" (res)
+        : "m" (*dst),
+        "r" (val) 
+        : "memory"
+    );
+
+    return (res);
+   
+}
+
+static inline uint32_t __sgx_spin_lock(sgx_spinlock_t *lock)
+{
+    while(_InterlockedExchange((volatile int *)lock, 1) != 0) {
+        while (*lock) {
+            /* tell cpu we are spinning */
+            _mm_pause();
+        } 
+    }
+
+    return (0);
+}
+
+static inline uint32_t __sgx_spin_unlock(sgx_spinlock_t *lock)
+{
+    *lock = 0;
+
+    return (0);
+}
+
 static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
 {
     int i = 0;
@@ -69,15 +105,15 @@ static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
     while( true ) {
 
         HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
-        //sgx_spin_lock( &data_ptr->spinlock );
-        // printf("[HotMsg_requestCall] keep polling: %d\n", hotMsg->keepPolling);
+        __sgx_spin_lock( &data_ptr->spinlock );
+        printf("[HotMsg_requestCall] keep polling: %d\n", hotMsg->keepPolling);
 
         if( data_ptr-> isRead == true ) {
             data_ptr-> isRead  = false;
             data_ptr->data = data;
             // data_capsule_t *clarg = (data_capsule_t *) data; 
             // printf("[HotMsg_requestCall] data id: %d\n", arg->id);
-            //sgx_spin_unlock( &data_ptr->spinlock );
+            __sgx_spin_unlock( &data_ptr->spinlock );
             break;
         }
         //else:
@@ -86,7 +122,7 @@ static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
         numRetries++;
         if( numRetries > MAX_RETRIES ){
             printf("exceeded tries\n");
-            //sgx_spin_unlock( &data_ptr->spinlock );
+            __sgx_spin_unlock( &data_ptr->spinlock );
             return -1;
         }
 

@@ -8,7 +8,7 @@ add_custom_command(
   COMMAND
     openenclave::oeedger8r --trusted ${CMAKE_SOURCE_DIR}/attestation.edl
     --search-path ${OE_INCLUDEDIR} --search-path
-    ${OE_INCLUDEDIR}/openenclave/edl/sgx)
+    ${OE_INCLUDEDIR}/openenclave/edl/sgx --search-path /opt/intel/sgxsdk/include)
 
 # Create a library common to each of our two enclaves.
 add_library(common OBJECT attestation.cpp crypto.cpp dispatcher.cpp hot_msg_pass.h dispatcher.h

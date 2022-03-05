@@ -35,7 +35,6 @@
 
 #ifndef _SGX_SPINLOCK_H_
 #define _SGX_SPINLOCK_H_
-
 #include <stdint.h>
 
 typedef volatile uint32_t sgx_spinlock_t;
@@ -46,8 +45,44 @@ typedef volatile uint32_t sgx_spinlock_t;
 extern "C" {
 #endif
 
+
+// static inline int _InterlockedExchange(int volatile * dst, int val)
+// {
+//     int res;
+
+//     __asm __volatile(
+//         "lock xchg %2, %1;"
+//         "mov %2, %0"
+//         : "=m" (res)
+//         : "m" (*dst),
+//         "r" (val) 
+//         : "memory"
+//     );
+
+//     return (res);
+   
+// }
+
+// uint32_t sgx_spin_lock(sgx_spinlock_t *lock)
+// {
+//     while(_InterlockedExchange((volatile int *)lock, 1) != 0) {
+//         while (*lock) {
+//             /* tell cpu we are spinning */
+//             _mm_pause();
+//         } 
+//     }
+
+//     return (0);
+// }
+
+// uint32_t sgx_spin_unlock(sgx_spinlock_t *lock)
+// {
+//     *lock = 0;
+
+//     return (0);
+// }
 uint32_t sgx_spin_lock(sgx_spinlock_t *lock);
-uint32_t sgx_spin_unlock(sgx_spinlock_t *lock);
+uint32_t sgx_spin_unlock(sgx_spinlock_t *lock); 
 
 #if defined(__cplusplus)
 }
