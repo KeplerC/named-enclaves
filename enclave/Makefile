@@ -6,12 +6,11 @@ include ../config.mk
 CFLAGS=$(shell pkg-config oeenclave-$(C_COMPILER) --cflags)
 CXXFLAGS=$(shell pkg-config oeenclave-$(CXX_COMPILER) --cflags)
 LDFLAGS=$(shell pkg-config oeenclave-$(CXX_COMPILER) --libs)
-INCDIR=$(shell pkg-config oeenclave-$(COMPILER) --variable=includedir)
+INCDIR=$(shell pkg-config oeenclave-$(C_COMPILER) --variable=includedir)
 CRYPTO_LDFLAGS=$(shell pkg-config oeenclave-$(COMPILER) --variable=${OE_CRYPTO_LIB}libs)
 
 all:
 	$(MAKE) genkey
-	$(MAKE) -C ../enclave_a genkey
 	$(MAKE) build
 	$(MAKE) sign
 
@@ -30,7 +29,7 @@ public.pem: private.pem
 # a malicious host might change it. So, we would need to load a certicate
 # that contains the expected public key that is signed by a trusted CA.
 genkey: public.pem
-	../gen_pubkey_header.sh ../enclave_a/enclave_b_pubkey.h $<
+	../gen_pubkey_header.sh ./enclave/enclave_a_pubkey.h $<
 
 build:
 	@ echo "Compilers used: $(CC), $(CXX)"
@@ -39,10 +38,10 @@ build:
 		--search-path $(INCDIR)/openenclave/edl/sgx
 	$(CXX) -g -c $(CXXFLAGS) $(INCLUDES) -I../../../include -I. -I.. -std=c++11 -DOE_API_VERSION=2 ecalls.cpp ../common/attestation.cpp ../common/crypto.cpp ../common/dispatcher.cpp
 	$(CC) -g -c $(CFLAGS) $(CINCLUDES) -I.. -DOE_API_VERSION=2 ../common/attestation_t.c
-	$(CXX) -o enclave_b attestation.o crypto.o ecalls.o dispatcher.o attestation_t.o $(LDFLAGS) $(CRYPTO_LDFLAGS)
+	$(CXX) -o enclave_a attestation.o crypto.o ecalls.o dispatcher.o attestation_t.o $(LDFLAGS) $(CRYPTO_LDFLAGS)
 
 sign:
-	oesign sign -e enclave_b -c enc.conf -k private.pem
+	oesign sign -e enclave_a -c enc.conf -k private.pem
 
 clean:
-	rm -f *.o enclave_b enclave_b.signed ../common/attestation_t.* ../common/attestation_args.h *.pem enclave_a_pubkey.h
+	rm -f *.o enclave_a enclave_a.signed ../common/attestation_t.* ../common/attestation_args.h *.pem 

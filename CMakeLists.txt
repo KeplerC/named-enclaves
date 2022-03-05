@@ -26,11 +26,10 @@ set(OE_CRYPTO_LIB
     CACHE STRING "Crypto library used by enclaves.")
 
 add_subdirectory(common)
-add_subdirectory(enclave_a)
-add_subdirectory(enclave_b)
+add_subdirectory(enclave)
 add_subdirectory(host)
 
-add_custom_target(sign ALL DEPENDS enclave_a_signed enclave_b_signed)
+add_custom_target(sign ALL DEPENDS enclave_a_signed)
 
 if ((NOT DEFINED ENV{OE_SIMULATION}) OR (NOT $ENV{OE_SIMULATION}))
   add_custom_target(run DEPENDS runsgxlocal runsgxremote)
@@ -39,13 +38,12 @@ if ((NOT DEFINED ENV{OE_SIMULATION}) OR (NOT $ENV{OE_SIMULATION}))
     runsgxlocal
     DEPENDS attestation_host sign
     COMMAND
-      attestation_host sgxlocal ${CMAKE_BINARY_DIR}/enclave_a/enclave_a.signed
-      ${CMAKE_BINARY_DIR}/enclave_b/enclave_b.signed)
+      attestation_host sgxlocal ${CMAKE_BINARY_DIR}/enclave/enclave.signed)
 
   add_custom_target(
     runsgxremote
     DEPENDS attestation_host sign
     COMMAND
-      attestation_host sgxremote ${CMAKE_BINARY_DIR}/enclave_a/enclave_a.signed
-      ${CMAKE_BINARY_DIR}/enclave_b/enclave_b.signed)
+      attestation_host sgxremote ${CMAKE_BINARY_DIR}/enclave/enclave.signed
+      ${CMAKE_BINARY_DIR}/enclave/enclave.signed)
 endif ()

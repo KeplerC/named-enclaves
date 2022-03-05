@@ -12,7 +12,7 @@
 // since the enclave binary itself is not encrypted. Instead, secrets are
 // acquired via provisioning from a service (such as a cloud server) after
 // successful attestation.
-// This g_enclave_secret_data holds the secret data specific to the holding
+// The g_enclave_secret_data holds the secret data specific to the holding
 // enclave, it's only visible inside this secured enclave. Arbitrary enclave
 // specific secret data exchanged by the enclaves. In this sample, the first
 // enclave sends its g_enclave_secret_data (encrypted) to the second enclave.
@@ -28,9 +28,8 @@ enclave_config_data_t config_data = {
 
 // Declare a static dispatcher object for enabling
 // for better organizing enclave-wise global variables
-static ecall_dispatcher dispatcher("Enclave2", &config_data);
-const char* enclave_name = "Enclave2";
-
+static ecall_dispatcher dispatcher("Enclave1", &config_data);
+const char* enclave_name = "Enclave1";
 int get_enclave_format_settings(
     const oe_uuid_t* format_id,
     format_settings_t* format_settings)
