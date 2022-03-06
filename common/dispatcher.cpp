@@ -193,7 +193,6 @@ int ecall_dispatcher::verify_evidence_with_public_key(
     size_t other_enclave_signing_key_pem_size
     )
 {
-    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
     int ret = 1;
 
     if (m_initialized == false)
@@ -232,7 +231,6 @@ int ecall_dispatcher::generate_encrypted_message(
     pem_key_t* other_enclave_pem_key
     )
 {
-    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
     uint8_t encrypted_data_buffer[1024];
     size_t encrypted_data_size;
     uint8_t* buffer;
@@ -278,7 +276,6 @@ exit:
 
 int ecall_dispatcher::process_encrypted_message(message_t* message)
 {
-    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
     uint8_t data[1024];
     size_t data_size = 0;
     int ret = 1;
@@ -362,7 +359,6 @@ int  ecall_dispatcher::HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *da
 
 
 void ecall_dispatcher::put_ocall(void* data){
-    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
     OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
     args->ocall_id = OCALL_PUT;
     args->data = data; //new capsule_pdu(); 

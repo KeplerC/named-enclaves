@@ -39,7 +39,11 @@ int get_enclave_format_settings(
 {
     return dispatcher.get_enclave_format_settings(format_id, format_settings);
 }
-
+void enclave_sample_code(){
+    int* s = (int*) oe_host_malloc(sizeof(int));
+    s[0] = 1;
+    dispatcher.put_ocall(s);
+}
 /**
  * Return the public key of this enclave along with the enclave's
  * evidence. Another enclave can use the evidence to attest the enclave
@@ -51,6 +55,7 @@ int get_evidence_with_public_key(
     pem_key_t* pem_key,
     evidence_t* evidence)
 {
+    enclave_sample_code();
     return dispatcher.get_evidence_with_public_key(
         format_id, format_settings, pem_key, evidence);
 }
@@ -73,6 +78,7 @@ int verify_evidence_and_set_public_key(
 // Encrypt message for another enclave using the public key stored for it.
 int generate_encrypted_message(message_t* message, pem_key_t* other_enclave_pem_key)
 {
+    //enclave_sample_code();
     return dispatcher.generate_encrypted_message(message, other_enclave_pem_key);
 }
 
@@ -85,9 +91,6 @@ int process_encrypted_message(message_t* message)
 
 int SetOcallBuffer( HotMsg *hotMsg ){
     dispatcher.SetOcallBuffer(hotMsg);
-    int* s = (int*) oe_host_malloc(sizeof(int));
-    s[0] = 1;
-    dispatcher.put_ocall(s);
     return 0;
 }
 
@@ -97,6 +100,3 @@ int EnclaveMsgStartResponder( HotMsg *hotMsg ){
 }
 
 
-void enclave_sample_code(){
-    
-}
