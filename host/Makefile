@@ -16,8 +16,8 @@ build:
 		--search-path $(INCDIR) \
 		--search-path $(INCDIR)/openenclave/edl/sgx
 	$(CC) -g -c $(CFLAGS) $(CINCLUDES) attestation_u.c
-	$(CXX) -g -c $(CXXFLAGS) $(INCLUDES) -std=c++11 host.cpp
-	$(CXX) -o attestation_host host.o attestation_u.o $(LDFLAGS) -lzmq
+	$(CXX) -g -c $(CXXFLAGS) $(INCLUDES) -std=c++11 host.cpp 
+	$(CXX) -o attestation_host host.o attestation_u.o $(LDFLAGS) 
 
 clean:
 	rm -f attestation_host *.o attestation_u.*  attestation_args.h

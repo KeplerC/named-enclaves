@@ -10,6 +10,7 @@
 #include "hot_msg_pass.h"
 #include <thread>
 #include <unistd.h>
+#include "net.h"
 
 // SGX Remote Attestation UUID.
 static oe_uuid_t sgx_remote_uuid = {OE_FORMAT_UUID_SGX_ECDSA};
@@ -83,6 +84,12 @@ class Enclave_Entity{
 public:
     Enclave_Entity(oe_enclave_t* enclave){
         m_enclave = enclave; 
+
+        //initialize network client 
+        m_net = new NetworkClient(this);
+
+
+
         // Initialize the OCALL/ECALL circular buffers for switchless calls 
         circ_buffer_enclave = (HotMsg *) calloc(1, sizeof(HotMsg));   // HOTMSG_INITIALIZER;
         HotMsg_init(circ_buffer_enclave);
@@ -107,6 +114,7 @@ public:
             fprintf(stderr, ("pthread_create() failed with error #%d: '%s'\n", result, strerror(result)));
             exit(EXIT_FAILURE);
         }
+
     }
 
     
@@ -133,6 +141,7 @@ private:
     uint16_t requestedCallID = 0;
     oe_enclave_t* m_enclave; 
     struct enclave_responder_args e_responder_args;
+    NetworkClient* m_net;
 };
 
 

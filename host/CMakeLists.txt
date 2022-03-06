@@ -10,7 +10,7 @@ add_custom_command(
     --search-path ${OE_INCLUDEDIR}/openenclave/edl/sgx)
 
 add_executable(attestation_host
-               host.cpp ${CMAKE_CURRENT_BINARY_DIR}/attestation_u.c)
+               host.cpp net.cpp ${CMAKE_CURRENT_BINARY_DIR}/attestation_u.c)
 target_include_directories(
   attestation_host
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ # For common/shared.h
@@ -24,4 +24,4 @@ if (WIN32)
   add_dependencies(attestation_host attestation_oedebugrt_target)
 endif ()
 
-target_link_libraries(attestation_host openenclave::oehost)
+target_link_libraries(attestation_host openenclave::oehost zmq)

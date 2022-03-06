@@ -24,6 +24,11 @@
 
 #ifndef __COMMON_H
 #define __COMMON_H
+
+
+#define NET_CLIENT_RECV_PORT 5006
+
+
 typedef volatile uint32_t sgx_spinlock_t;
 typedef unsigned long int pthread_t;
 
@@ -69,7 +74,7 @@ typedef struct {
 typedef struct{
     uint8_t* sender_name; 
     uint8_t* receiver_name; 
-    
+
     uint8_t* payload_l;
     uint8_t* payload_in_transit;
     uint8_t* signature;
