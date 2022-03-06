@@ -400,9 +400,6 @@ exit:
             printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
             printf("[EnclaveMsgStartResponder] data is: %d\n", *result);
             //TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
-            uint8_t* d = (uint8_t*)oe_host_malloc(sizeof(uint8_t)); 
-            d[0] = 20000;
-            put_ocall(d);
             data_ptr->data = 0;
         }
 

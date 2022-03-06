@@ -166,18 +166,16 @@ static void *StartOcallResponder( void *arg ) {
           //Message exists!
           OcallParams *args = (OcallParams *) data_ptr->data; 
           int* result = (int*)args->data; 
-        printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
-        printf("[EnclaveMsgStartResponder] data is: %d\n", *result);
-          //capsule_pdu *dc = &data_ptr->dc; 
 
-        //   switch(data_ptr->ocall_id){
-        //     case OCALL_PUT:
-        //         result = (int*)args->data; 
-        //         printf("[OCALL] dc data : %d\n", result);
-        //         break;
-        //     default:
-        //         printf("Invalid ECALL id: %d\n", args->ocall_id);
-        //   }
+          switch(data_ptr->ocall_id){
+            case OCALL_PUT:
+                OcallParams *args = (OcallParams *) data_ptr->data; 
+                int* result = (int*)args->data; 
+                printf("[OCALL] dc data : %d\n", *result);
+                break;
+            default:
+                printf("Invalid ECALL id: %d\n", args->ocall_id);
+          }
           data_ptr->data = 0; 
       }
 
