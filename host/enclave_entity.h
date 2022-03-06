@@ -11,7 +11,7 @@
 #include <thread>
 #include <unistd.h>
 #include "net.h"
-
+#include "log.h"
 // SGX Remote Attestation UUID.
 static oe_uuid_t sgx_remote_uuid = {OE_FORMAT_UUID_SGX_ECDSA};
 
@@ -37,8 +37,12 @@ static void* thread_run_net_client(void* net_client){
 //handler for ocall -> network
 static void *StartOcallResponder( void *arg ) {
 
-    HotMsg *hotMsg = (HotMsg *) arg;
+    zmq::context_t context (1);
+    // to router
+    zmq::socket_t* socket_ptr  = new  zmq::socket_t( context, ZMQ_PUSH);
+    socket_ptr -> connect ("tcp://" + std::string(NET_PROXY_IP) + ":" + std::string(NET_PROXY_PORT));
 
+    HotMsg *hotMsg = (HotMsg *) arg;
     int dataID = 0;
 
     static int i;
@@ -63,11 +67,15 @@ static void *StartOcallResponder( void *arg ) {
           //Message exists!
           OcallParams *args = (OcallParams *) data_ptr->data; 
           int* result;
+          zmq::message_t* msg;
 
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
                 result = (int*)args->data; 
                 printf("[OCALL] dc data : %d\n", *result);
+                msg = new zmq::message_t(sizeof(int));
+                memcpy(msg->data(), result, sizeof(int)); //TODO: change to real size
+                socket_ptr->send(*msg);
                 break;
             default:
                 printf("Invalid ECALL id: %d\n", args->ocall_id);
@@ -133,16 +141,12 @@ public:
 
     }
 
-    void start_ecall(){
+    void ecall_send_to_enclave(void* data){
         EcallParams *args = (EcallParams *) malloc(sizeof(EcallParams));
-        int *data = (int *) malloc(sizeof(int));
         args->ecall_id = ECALL_PUT;
-        *data   = 250000;
         args->data = data; 
-        for( uint64_t i=0; i < 10; ++i ) {
-            printf("[start_ecall] id is: %d\n",requestedCallID);
-            HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args );
-        }
+        printf("[start_ecall] id is: %d\n",requestedCallID);
+        HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args);
     }
 private: 
     HotMsg *circ_buffer_enclave;

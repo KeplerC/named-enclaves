@@ -39,8 +39,7 @@ int main(int argc, const char* argv[])
     
 
     auto ee = Enclave_Entity(enclave_a);
-    ee.start_ecall();
-
+    sleep(1);
 
     generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key); 
     verify_identity_report(format_id, "enclave_b", enclave_b, evidence, pem_key); 

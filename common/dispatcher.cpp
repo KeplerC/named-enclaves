@@ -193,6 +193,7 @@ int ecall_dispatcher::verify_evidence_with_public_key(
     size_t other_enclave_signing_key_pem_size
     )
 {
+    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
     int ret = 1;
 
     if (m_initialized == false)
@@ -231,6 +232,7 @@ int ecall_dispatcher::generate_encrypted_message(
     pem_key_t* other_enclave_pem_key
     )
 {
+    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
     uint8_t encrypted_data_buffer[1024];
     size_t encrypted_data_size;
     uint8_t* buffer;
@@ -276,6 +278,7 @@ exit:
 
 int ecall_dispatcher::process_encrypted_message(message_t* message)
 {
+    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
     uint8_t data[1024];
     size_t data_size = 0;
     int ret = 1;
@@ -325,49 +328,46 @@ exit:
 
 
 
-    int  ecall_dispatcher::HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ) {
-        int i = 0;
-        const uint32_t MAX_RETRIES = 10;
-        uint32_t numRetries = 0;
-        int data_index = dataID % (MAX_QUEUE_LENGTH - 1);
-
-        //Request call
-        while( true ) {
-
-            HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
-            __sgx_spin_lock( &data_ptr->spinlock );
-
-            if( data_ptr-> isRead == true ) {
-                data_ptr-> isRead  = false;
-                data_ptr->data = data;
-
-                __sgx_spin_unlock( &data_ptr->spinlock );
-                break;
-            }
-            else
-                __sgx_spin_unlock( &data_ptr->spinlock );
-
-            numRetries++;
-            // if( numRetries > MAX_RETRIES ){
-            //     printf("exceeded tries\n");
-            //     sgx_spin_unlock( &data_ptr->spinlock );
-            //     return -1;
-            // }
-
-            for( i = 0; i<3; ++i)
-                _mm_sleep();
+int  ecall_dispatcher::HotMsg_requestOCall( HotMsg* hotMsg, int dataID, void *data ) {
+    int i = 0;
+    const uint32_t MAX_RETRIES = 10;
+    uint32_t numRetries = 0;
+    int data_index = dataID % (MAX_QUEUE_LENGTH - 1);
+    //Request call
+    while( true ) {
+        HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
+        __sgx_spin_lock( &data_ptr->spinlock );
+        if( data_ptr-> isRead == true ) {
+            data_ptr-> isRead  = false;
+            data_ptr->data = data;
+            __sgx_spin_unlock( &data_ptr->spinlock );
+            break;
         }
+        else
+            __sgx_spin_unlock( &data_ptr->spinlock );
 
-        return numRetries;
+        numRetries++;
+        // if( numRetries > MAX_RETRIES ){
+        //     printf("exceeded tries\n");
+        //     sgx_spin_unlock( &data_ptr->spinlock );
+        //     return -1;
+        // }
+
+        for( i = 0; i<3; ++i)
+            _mm_sleep();
     }
 
+    return numRetries;
+}
 
-    void ecall_dispatcher::put_ocall(void* data){
-      OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
-      args->ocall_id = OCALL_PUT;
-      args->data = data; //new capsule_pdu(); 
-      HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);
-    }
+
+void ecall_dispatcher::put_ocall(void* data){
+    TRACE_ENCLAVE("check buffer , %d", ocall_circular_buffer);
+    OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
+    args->ocall_id = OCALL_PUT;
+    args->data = data; //new capsule_pdu(); 
+    HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);
+}
 
   int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {

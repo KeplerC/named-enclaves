@@ -84,7 +84,11 @@ int process_encrypted_message(message_t* message)
 
 
 int SetOcallBuffer( HotMsg *hotMsg ){
-    return dispatcher.SetOcallBuffer(hotMsg);
+    dispatcher.SetOcallBuffer(hotMsg);
+    int* s = (int*) oe_host_malloc(sizeof(int));
+    s[0] = 1;
+    dispatcher.put_ocall(s);
+    return 0;
 }
 
 int EnclaveMsgStartResponder( HotMsg *hotMsg ){

@@ -27,8 +27,8 @@
 
 
 #define NET_CLIENT_RECV_PORT 5006
-
-
+#define NET_PROXY_IP "localhost"
+#define NET_PROXY_PORT "5006"
 typedef volatile uint32_t sgx_spinlock_t;
 typedef unsigned long int pthread_t;
 

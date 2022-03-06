@@ -27,7 +27,10 @@ void NetworkClient::run(){
 
         if (pollitems[0].revents & ZMQ_POLLIN){
             //Get the address
-            std::string msg = this->recv_string(&socket_recv);
+            //std::string msg = this->recv_string(&socket_recv);
+            zmq::message_t message;
+            socket_recv.recv(&message);
+            m_enclave_entity->ecall_send_to_enclave(message.data());
         }
     }
 }
