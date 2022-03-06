@@ -9,7 +9,7 @@
 #include "hot_msg_pass.h"
 #include <thread>
 #include <unistd.h>
-
+#include "zmq.h"
 // SGX Remote Attestation UUID.
 static oe_uuid_t sgx_remote_uuid = {OE_FORMAT_UUID_SGX_ECDSA};
 
@@ -165,12 +165,11 @@ static void *StartOcallResponder( void *arg ) {
       if(data_ptr->data){
           //Message exists!
           OcallParams *args = (OcallParams *) data_ptr->data; 
-          int* result = (int*)args->data; 
+          int* result;
 
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
-                OcallParams *args = (OcallParams *) data_ptr->data; 
-                int* result = (int*)args->data; 
+                result = (int*)args->data; 
                 printf("[OCALL] dc data : %d\n", *result);
                 break;
             default:
