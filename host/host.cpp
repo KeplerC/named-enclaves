@@ -11,6 +11,8 @@
 #include "enclave_entity.h"
 #include "oe_helpers.h"
 
+const char* enclave_name = "HOST_UNTRUSTED";
+
 int main(int argc, const char* argv[])
 {
     oe_enclave_t* enclave_a = NULL;

@@ -29,6 +29,11 @@ static void* thread_run_ecall_responder(void* hotMsgAsVoidP){
     return NULL;
 }
 
+static void* thread_run_net_client(void* net_client){
+    ((NetworkClient*) net_client)->run();
+    return NULL;
+}
+
 //handler for ocall -> network
 static void *StartOcallResponder( void *arg ) {
 
@@ -85,10 +90,14 @@ public:
     Enclave_Entity(oe_enclave_t* enclave){
         m_enclave = enclave; 
 
-        //initialize network client 
+        //initialize network client thread
         m_net = new NetworkClient(this);
-
-
+        int result = pthread_create(&m_net_client_thread, NULL, thread_run_net_client, (void*)m_net);
+        if (0 != result)
+        {
+            fprintf(stderr, ("pthread_create() failed with error #%d: '%s'\n", result, strerror(result)));
+            exit(EXIT_FAILURE);
+        }
 
         // Initialize the OCALL/ECALL circular buffers for switchless calls 
         circ_buffer_enclave = (HotMsg *) calloc(1, sizeof(HotMsg));   // HOTMSG_INITIALIZER;
@@ -100,7 +109,7 @@ public:
         //start ecall responder
         //first argument this->client
         e_responder_args = {m_enclave, circ_buffer_enclave};
-        int result = pthread_create(&circ_buffer_enclave->responderThread, NULL, thread_run_ecall_responder, (void*)&e_responder_args );
+        result = pthread_create(&circ_buffer_enclave->responderThread, NULL, thread_run_ecall_responder, (void*)&e_responder_args );
         if (0 != result)
         {
             fprintf(stderr, ("pthread_create() failed with error #%d: '%s'\n", result, strerror(result)));
@@ -142,6 +151,8 @@ private:
     oe_enclave_t* m_enclave; 
     struct enclave_responder_args e_responder_args;
     NetworkClient* m_net;
+
+    pthread_t m_net_client_thread;
 };
 
 

@@ -1,12 +1,11 @@
 
 #include "net.h"
 #include "enclave_entity.h"
-
+#include "log.h"
 
 NetworkClient::NetworkClient(Enclave_Entity* enclave){
     {
-        m_enclave = enclave; 
-        m_enclave -> run();
+        m_enclave_entity = enclave; 
     }
 }
 
@@ -17,6 +16,7 @@ void NetworkClient::run(){
     // socket for join requests
     zmq::socket_t socket_recv (context, ZMQ_PULL);
     socket_recv.bind ("tcp://*:" + std::to_string(NET_CLIENT_RECV_PORT));
+    TRACE_ENCLAVE("[NetworkClient] Network Client thread started!");
 
     std::vector<zmq::pollitem_t> pollitems = {
         { static_cast<void *>(socket_recv), 0, ZMQ_POLLIN, 0 },
@@ -28,7 +28,6 @@ void NetworkClient::run(){
         if (pollitems[0].revents & ZMQ_POLLIN){
             //Get the address
             std::string msg = this->recv_string(&socket_recv);
-            
         }
     }
 }
@@ -43,6 +42,7 @@ zmq::message_t NetworkClient::string_to_message(const std::string& s) {
 std::string NetworkClient::message_to_string(const zmq::message_t& message) {
     return std::string(static_cast<const char*>(message.data()), message.size());
 }
+
 std::string NetworkClient::recv_string(zmq::socket_t* socket) {
     zmq::message_t message;
     socket->recv(&message);

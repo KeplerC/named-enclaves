@@ -21,7 +21,7 @@ private:
 private:
     std::string local_proxy_ip = "localhost";
     std::string local_proxy_port = "5005";
-    Enclave_Entity* m_enclave; 
+    Enclave_Entity* m_enclave_entity; 
 };
 
 #endif
