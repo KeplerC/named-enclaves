@@ -6,6 +6,7 @@
 #include <openenclave/attestation/sgx/report.h>
 #include <openenclave/attestation/verifier.h>
 #include <openenclave/enclave.h>
+#include "common.h"
 
 ecall_dispatcher::ecall_dispatcher(
     const char* name,
@@ -339,17 +340,12 @@ exit:
             if( data_ptr-> isRead == true ) {
                 data_ptr-> isRead  = false;
                 data_ptr->data = data;
-        
-                OcallParams *arg = (OcallParams *) data; 
-                //data_capsule_t *dc = (data_capsule_t *) arg->data; 
 
-                //Must copy to the host since we cannot pass a pointer from enclave
-                //memcpy(&data_ptr->dc, dc, sizeof(data_capsule_t));
                 __sgx_spin_unlock( &data_ptr->spinlock );
                 break;
             }
-            //else:
-            //sgx_spin_unlock( &data_ptr->spinlock );
+            else
+                __sgx_spin_unlock( &data_ptr->spinlock );
 
             numRetries++;
             // if( numRetries > MAX_RETRIES ){
@@ -366,11 +362,11 @@ exit:
     }
 
 
-    void ecall_dispatcher::put_ocall(){
-      OcallParams args;
-      args.ocall_id = OCALL_PUT;
-      args.data = 0; 
-      HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, &args);
+    void ecall_dispatcher::put_ocall(void* data){
+      OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
+      args->ocall_id = OCALL_PUT;
+      args->data = data; //new capsule_pdu(); 
+      HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);
     }
 
   int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
@@ -404,8 +400,10 @@ exit:
             printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
             printf("[EnclaveMsgStartResponder] data is: %d\n", *result);
             //TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
-            //put_ocall();
-            data_ptr->data = 0; 
+            uint8_t* d = (uint8_t*)oe_host_malloc(sizeof(uint8_t)); 
+            d[0] = 20000;
+            put_ocall(d);
+            data_ptr->data = 0;
         }
 
         data_ptr->isRead      = true;

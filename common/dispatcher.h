@@ -61,7 +61,7 @@ class ecall_dispatcher
       return 0;
     }
 
-    void put_ocall();
+    void put_ocall(void* data);
 
   private:
     bool initialize(const char* name);

@@ -106,7 +106,7 @@ static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
 
         HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
         __sgx_spin_lock( &data_ptr->spinlock );
-        printf("[HotMsg_requestCall] keep polling: %d\n", hotMsg->keepPolling);
+        printf("[HotMsg_requestECall] keep polling: %d\n", hotMsg->keepPolling);
 
         if( data_ptr-> isRead == true ) {
             data_ptr-> isRead  = false;
@@ -114,7 +114,7 @@ static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
             // data_capsule_t *clarg = (data_capsule_t *) data; 
             EcallParams * args = (EcallParams*) data;
             int* result = (int*)args->data; 
-            printf("[HotMsg_requestCall] data is: %d\n", *result);
+            printf("[HotMsg_requestECall] data is: %d\n", *result);
             __sgx_spin_unlock( &data_ptr->spinlock );
             break;
         }

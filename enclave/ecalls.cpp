@@ -91,3 +91,8 @@ int EnclaveMsgStartResponder( HotMsg *hotMsg ){
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] call to dispatcher");
     return dispatcher.EnclaveMsgStartResponder(hotMsg);
 }
+
+
+void enclave_sample_code(){
+    
+}
