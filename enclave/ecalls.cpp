@@ -60,7 +60,7 @@ int verify_evidence_and_set_public_key(
     const oe_uuid_t* format_id,
     pem_key_t* pem_key,
     evidence_t* evidence, 
-    pem_key_t* claimed_pem_key)
+    pem_key_t* other_enclave_signing_pem_key)
 {
     return dispatcher.verify_evidence_with_public_key(
         format_id, pem_key, evidence,OTHER_ENCLAVE_PUBLIC_KEY, 

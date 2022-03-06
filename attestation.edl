@@ -51,7 +51,7 @@ enclave {
             [in] const oe_uuid_t* format_id,
             [in] pem_key_t *pem_key,
             [in] evidence_t *evidence, 
-            [in] pem_key_t *claimed_pem_key);
+            [in] pem_key_t *other_enclave_signing_pem_key);
 
         // Encrypt message for another enclave using the public key stored for it
         public int generate_encrypted_message(

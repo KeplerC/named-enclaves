@@ -47,8 +47,8 @@ class ecall_dispatcher
         const oe_uuid_t* format_id,
         pem_key_t* pem_key,
         evidence_t* evidence,
-        const char* other_enclave_claimed_public_key_pem, 
-        size_t other_enclave_claimed_public_key_pem_size);
+        const char* other_enclave_signing_key_pem, 
+        size_t other_enclave_signing_key_pem_size);
 
     int generate_encrypted_message(message_t* message, pem_key_t* other_enclave_pem_key);
 

@@ -48,8 +48,8 @@ class Attestation
         size_t evidence_size,
         const uint8_t* data,
         size_t data_size, 
-        const char* other_enclave_claimed_public_key_pem, 
-        size_t other_enclave_claimed_public_key_pem_size);
+        const char* other_enclave_signing_key_pem, 
+        size_t other_enclave_signing_key_pem_size);
 };
 
 #endif // OE_SAMPLES_ATTESTATION_ENC_ATTESTATION_H

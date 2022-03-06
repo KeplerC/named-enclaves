@@ -168,8 +168,8 @@ bool Attestation::attest_attestation_evidence(
     size_t evidence_size,
     const uint8_t* data,
     size_t data_size, 
-    const char* other_enclave_claimed_public_key_pem, 
-    size_t other_enclave_claimed_public_key_pem_size
+    const char* other_enclave_signing_key_pem, 
+    size_t other_enclave_signing_key_pem_size
     )
 {
     bool ret = false;
@@ -227,8 +227,8 @@ bool Attestation::attest_attestation_evidence(
         size_t other_enclave_signer_id_size = sizeof(m_enclave_signer_id);
         // TODO: the following call is not TEE-agnostic.
         if (oe_sgx_get_signer_id_from_public_key(
-                other_enclave_claimed_public_key_pem,
-                other_enclave_claimed_public_key_pem_size,
+                other_enclave_signing_key_pem,
+                other_enclave_signing_key_pem_size,
                 m_enclave_signer_id,
                 &other_enclave_signer_id_size) != OE_OK)
         {
@@ -351,6 +351,9 @@ bool Attestation::attest_attestation_evidence(
         "custom claim 1(%s): %s",
         custom_claims[0].name,
         custom_claims[0].value);
+    TRACE_ENCLAVE(
+        "claimed key: %s",other_enclave_signing_key_pem
+        );
 
     TRACE_ENCLAVE("custom claim 2(%s) hash check:", custom_claims[1].name);
 
@@ -362,8 +365,8 @@ bool Attestation::attest_attestation_evidence(
     }
     TRACE_ENCLAVE("hash match");
 
-    ret = true;
     TRACE_ENCLAVE("attestation succeeded");
+    ret = true;
 exit:
     // Shut down attester/verifier and free claims.
     oe_attester_shutdown();

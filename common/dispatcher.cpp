@@ -188,8 +188,8 @@ int ecall_dispatcher::verify_evidence_with_public_key(
     const oe_uuid_t* format_id,
     pem_key_t* pem_key,
     evidence_t* evidence,
-    const char* other_enclave_claimed_public_key_pem, 
-    size_t other_enclave_claimed_public_key_pem_size
+    const char* other_enclave_signing_key_pem, 
+    size_t other_enclave_signing_key_pem_size
     )
 {
     int ret = 1;
@@ -207,8 +207,8 @@ int ecall_dispatcher::verify_evidence_with_public_key(
             evidence->size,
             pem_key->buffer,
             pem_key->size, 
-            other_enclave_claimed_public_key_pem, 
-            other_enclave_claimed_public_key_pem_size) == false)
+            other_enclave_signing_key_pem, 
+           other_enclave_signing_key_pem_size) == false)
     {
         TRACE_ENCLAVE("verify_evidence_and_set_public_key failed.");
         goto exit;
