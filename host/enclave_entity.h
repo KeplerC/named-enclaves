@@ -35,14 +35,14 @@ static void* thread_run_net_client(void* net_client){
 }
 
 //handler for ocall -> network
-static void *StartOcallResponder( void *arg ) {
+static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
 
     zmq::context_t context (1);
     // to router
     zmq::socket_t* socket_ptr  = new  zmq::socket_t( context, ZMQ_PUSH);
     socket_ptr -> connect ("tcp://" + std::string(NET_PROXY_IP) + ":" + std::string(NET_PROXY_PORT));
 
-    HotMsg *hotMsg = (HotMsg *) arg;
+    HotMsg *hotMsg = (HotMsg *) hot_msg_as_void_ptr;
     int dataID = 0;
 
     static int i;
@@ -66,15 +66,13 @@ static void *StartOcallResponder( void *arg ) {
       if(data_ptr->data){
           //Message exists!
           OcallParams *args = (OcallParams *) data_ptr->data; 
-          int* result;
           zmq::message_t* msg;
 
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
-                result = (int*)args->data; 
-                printf("[OCALL] dc data : %d\n", *result);
-                msg = new zmq::message_t(sizeof(int));
-                memcpy(msg->data(), result, sizeof(int)); //TODO: change to real size
+                printf("[OCALL] dc data : %s\n", args->data);
+                msg = new zmq::message_t();
+                memcpy(msg->data(), args->data, args->data_size);
                 socket_ptr->send(*msg);
                 break;
             default:

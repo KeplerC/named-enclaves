@@ -44,11 +44,13 @@ typedef struct {
     uint64_t* cyclesCount;
     uint64_t  counter;
     void*     data; 
+    size_t  data_size; 
     enum OCALL_ID  ocall_id; 
 } OcallParams;
 
 typedef struct {
     void*     data; 
+    size_t data_size; 
     enum ECALL_ID  ecall_id; 
 } EcallParams;
 
@@ -68,29 +70,5 @@ typedef struct {
     bool            keepPolling;
     HotData**    MsgQueue;
 } HotMsg;
-
-
-
-typedef struct{
-    uint8_t* sender_name; 
-    uint8_t* receiver_name; 
-
-    uint8_t* payload_l;
-    uint8_t* payload_in_transit;
-    uint8_t* signature;
-    
-    uint8_t* prevHash; //Hash ptr to the previous record, not needed for the minimal prototype
-    uint8_t* hash;
-
-    int64_t timestamp;
-    uint8_t* msgType;
-
-} capsule_pdu;
-
-typedef struct{
-    uint8_t* name; //hash of metadata 
-    uint8_t* public_key; 
-    uint8_t* identity;
-} capsule_advertise;
 
 #endif

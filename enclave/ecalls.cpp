@@ -39,11 +39,11 @@ int get_enclave_format_settings(
 {
     return dispatcher.get_enclave_format_settings(format_id, format_settings);
 }
+
 void enclave_sample_code(){
-    int* s = (int*) oe_host_malloc(sizeof(int));
-    s[0] = 1;
-    dispatcher.put_ocall(s);
+    dispatcher.put_ocall("hello");
 }
+
 /**
  * Return the public key of this enclave along with the enclave's
  * evidence. Another enclave can use the evidence to attest the enclave
