@@ -62,9 +62,12 @@ int verify_evidence_and_set_public_key(
     evidence_t* evidence, 
     pem_key_t* other_enclave_signing_pem_key)
 {
+    //Note: Here we assume other enclave's signing key == the enclave's own signing key
     return dispatcher.verify_evidence_with_public_key(
-        format_id, pem_key, evidence,OTHER_ENCLAVE_PUBLIC_KEY, 
-        sizeof(OTHER_ENCLAVE_PUBLIC_KEY));
+        format_id, pem_key, evidence,
+        OTHER_ENCLAVE_PUBLIC_KEY, 
+        sizeof(OTHER_ENCLAVE_PUBLIC_KEY)
+        );
 }
 
 // Encrypt message for another enclave using the public key stored for it.

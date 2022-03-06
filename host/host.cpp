@@ -294,7 +294,32 @@ int main(int argc, const char* argv[])
     }
 #endif
 
-    
+    encrypted_message.data = NULL;
+
+    printf("Host: Requesting encrypted message from 2nd enclave\n");
+    result = generate_encrypted_message(enclave_b, &ret, &encrypted_message, &pem_key);
+    if ((result != OE_OK) || (ret != 0))
+    {
+        printf(
+            "Host: generate_encrypted_message failed. %s",
+            oe_result_str(result));
+        if (ret == 0)
+            ret = 1;
+        goto exit;
+    }
+
+    printf("Sending encrypted message to 1st enclave=====\n");
+    result = process_encrypted_message(enclave_a, &ret, &encrypted_message);
+    if ((result != OE_OK) || (ret != 0))
+    {
+        printf(
+            "host process_encrypted_message failed. %s", oe_result_str(result));
+        if (ret == 0)
+            ret = 1;
+        goto exit;
+    }
+
+
     sleep(10);
     ret = 0;
 
