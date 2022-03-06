@@ -71,9 +71,10 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
                 printf("[OCALL] dc data : %s\n", args->data);
-                msg = new zmq::message_t();
+                msg = new zmq::message_t(args->data_size);
                 memcpy(msg->data(), args->data, args->data_size);
                 socket_ptr->send(*msg);
+                printf("[OCALL] dc data : %s\n", msg->data());
                 break;
             default:
                 printf("Invalid ECALL id: %d\n", args->ocall_id);
@@ -139,10 +140,11 @@ public:
 
     }
 
-    void ecall_send_to_enclave(void* data){
+    void ecall_send_to_enclave(void* data, size_t data_size){
         EcallParams *args = (EcallParams *) malloc(sizeof(EcallParams));
         args->ecall_id = ECALL_PUT;
-        args->data = data; 
+        args->data = data;
+        args->data_size = data_size; 
         printf("[start_ecall] id is: %d\n",requestedCallID);
         HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args);
     }

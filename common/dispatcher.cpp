@@ -397,9 +397,8 @@ void ecall_dispatcher::put_ocall(std::string data){
         if(data_ptr->data){
             //Message exists!
             EcallParams * args = (EcallParams*) data_ptr->data;
-            int* result = (int*)args->data; 
             printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
-            printf("[EnclaveMsgStartResponder] data is: %d\n", *result);
+            printf("[EnclaveMsgStartResponder] data is: %s\n", args->data);
             //TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
             data_ptr->data = 0;
         }

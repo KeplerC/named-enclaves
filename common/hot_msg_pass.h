@@ -113,8 +113,7 @@ static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
             data_ptr->data = data;
             // data_capsule_t *clarg = (data_capsule_t *) data; 
             EcallParams * args = (EcallParams*) data;
-            int* result = (int*)args->data; 
-            printf("[HotMsg_requestECall] data is: %d\n", *result);
+            printf("[HotMsg_requestECall] data is: %s\n", args->data);
             __sgx_spin_unlock( &data_ptr->spinlock );
             break;
         }
