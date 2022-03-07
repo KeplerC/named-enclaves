@@ -39,12 +39,29 @@ private:
     std::string msgType;
 }; 
 
+class CapsuleAdvertise{
+public: 
+CapsuleAdvertise(void* buffer, size_t size){
 
+}
 
-typedef struct{
+void* to_untrusted_string(){
+    //void* ret = oe_host_malloc(name.size());
+    //memcpy(ret, name.c_str(), name.size());
+    //return ret; 
+    return 0;
+}
+
+size_t get_payload_size(){
+    //return name.size();
+    return 0;
+}
+
+private: 
     uint8_t* name; //hash of metadata 
     uint8_t* public_key; 
     uint8_t* identity;
-} capsule_advertise;
+}; 
+
 
 #endif 
