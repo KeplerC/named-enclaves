@@ -97,14 +97,16 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
 class Enclave_Entity{
 public:
     Enclave_Entity(char* enclave_name){
-
+        printf("\n=============================");
+        printf("Initiating enclave %s", enclave_name);
+        printf("=============================\n");
         m_enclave = create_enclave("./enclave/enclave_a.signed", enclave_flags);; 
         if (m_enclave == NULL)
         {
             printf("Enclave creation failed!\n");
+            exit(EXIT_FAILURE);
         }
-        printf("Enclave %s creation successful!\n", enclave_name);
-
+        
         //initialize network client thread
         m_net = new NetworkClient(this);
         int result = pthread_create(&m_net_client_thread, NULL, thread_run_net_client, (void*)m_net);
@@ -139,13 +141,23 @@ public:
             exit(EXIT_FAILURE);
         }
 
+        printf("Enclave %s creation successful!\n", enclave_name);
+
     }
 
+    void advertise(){
+        printf("\n=============================");
+        printf("Generating Identity");
+        printf("=============================\n");
+        generate_identity_report(format_id, "enclave_a", m_enclave, evidence, pem_key); 
+    }
     
 
     void run(){
-
-
+        printf("\n=============================");
+        printf("Running In-Enclave User's Code");
+        printf("=============================\n");
+        EnclaveSampleCode(m_enclave);
     }
 
     void ecall_send_to_enclave(void* data, size_t data_size){
@@ -157,14 +169,19 @@ public:
         HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args);
     }
 private: 
+    oe_enclave_t* m_enclave; 
+    // circular buffer
     HotMsg *circ_buffer_enclave;
     HotMsg *circ_buffer_host; 
     uint16_t requestedCallID = 0;
-    oe_enclave_t* m_enclave; 
+    // networking 
     struct enclave_responder_args e_responder_args;
     NetworkClient* m_net;
-
     pthread_t m_net_client_thread;
+    //identity related 
+    oe_uuid_t* format_id = &sgx_remote_uuid;
+    evidence_t evidence = {0};
+    pem_key_t pem_key = {0};
 
 private: 
     oe_enclave_t* create_enclave(const char* enclave_path, uint32_t flags)

@@ -40,7 +40,7 @@ int get_enclave_format_settings(
     return dispatcher.get_enclave_format_settings(format_id, format_settings);
 }
 
-void enclave_sample_code(){
+void EnclaveSampleCode(){
     dispatcher.put_ocall("hello");
 }
 
@@ -55,7 +55,6 @@ int get_evidence_with_public_key(
     pem_key_t* pem_key,
     evidence_t* evidence)
 {
-    enclave_sample_code();
     return dispatcher.get_evidence_with_public_key(
         format_id, format_settings, pem_key, evidence);
 }

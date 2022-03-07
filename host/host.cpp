@@ -20,15 +20,14 @@ int main(int argc, const char* argv[])
     message_t encrypted_message = {0};
     oe_result_t result = OE_OK;
     int ret = 1;
-    oe_uuid_t* format_id = &sgx_remote_uuid;
-    evidence_t evidence = {0};
-    pem_key_t pem_key = {0};
+
 
     printf("Host: Creating enclaves\n");
     
 
     auto ee = Enclave_Entity("enclave_a");
-    sleep(1);
+    ee.advertise();
+    ee.run();
 
     //generate_identity_report(format_id, "enclave_a", enclave_a, evidence, pem_key); 
     //verify_identity_report(format_id, "enclave_b", enclave_b, evidence, pem_key); 
@@ -78,10 +77,10 @@ int main(int argc, const char* argv[])
 exit:
     // Free host memory allocated by the enclave.
     printf("Host: Terminating everything on exit\n");
-    if (encrypted_message.data)
-        free(encrypted_message.data);
-    if (evidence.buffer)
-        free(evidence.buffer);
+    // if (encrypted_message.data)
+    //     free(encrypted_message.data);
+    // if (evidence.buffer)
+    //     free(evidence.buffer);
 
     // printf("Host: Terminating enclaves\n");
     // if (enclave_a)

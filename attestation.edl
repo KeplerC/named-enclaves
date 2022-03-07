@@ -70,6 +70,7 @@ enclave {
             [user_check]HotMsg *hotMsg 
         ); 
 
+        public void EnclaveSampleCode(); 
     };
 
     //untrusted {
