@@ -46,34 +46,22 @@ CapsuleAdvertise(evidence_t* identity, pem_key_t* public_key){
     m_identity = identity;
     m_public_key = public_key;
     m_crypto = new Crypto();
-    metadata = std::string(reinterpret_cast<char*>(identity->buffer)) 
-                + "," + std::string(reinterpret_cast<char*>(public_key->buffer)); 
+    metadata = std::string( identity->buffer,identity->buffer + identity->size)  \
+          + "," + std::string( public_key->buffer,public_key->buffer + public_key->size) ;
     uint8_t metadata_in_c_str[metadata.size()];
     strcpy((char*) metadata_in_c_str, metadata.c_str());  
     m_crypto->Sha256(metadata_in_c_str, metadata.size(), m_name);
-    metadata += "," + std::string(reinterpret_cast<char*>(m_name));
+    //metadata += "," + std::string(reinterpret_cast<char*>(m_name));
+    metadata += "," + std::string( m_name, m_name + 32);
 }
 
 void* to_untrusted_string(){
     void* ret = oe_host_malloc(metadata.size());
-    memcpy(ret, metadata.c_str(), 2048);
+    memcpy(ret, metadata.c_str(), metadata.size());
     //return ret; 
     return ret;
 }
 
-// void* to_untrusted_string(){
-//     std::string payload_in_transit = "hello jkldsfjkl;asdjfk;lsajklfd;;slkafsafjkdls-----BEGIN PUBLIC KEY-----\
-// MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxm3aImvOOyCQYVDKfK7P\
-// pdZ5gjvXJHwDVrttwdknLCumaCOxFRge1lwZ3SICUEUhAJDPJjy1vcWLulhhjxHh\
-// EEWg7prpvKnXdr/SAGjJORv+iSUeUxIE2CjUoQVhXlsG2g3XOzLw/JLKlEz1ro+x\
-// jUmd/C45+d/sEiqdvZYATAiWW0rVecKJAaMZPkBbbNAz8dyZQy76rRYE27Llc0Xh\
-// OXOO1P4SEe/L8WkmV4PzuYBg4pioKsrddYkbEKcmEUzngxiepqsfXyJoYHhCJyTP\
-// l3v67y37tQDj2zF7kRxQ3z59ax1tuBx+dL7nHu0MSoQNFbIeDizwImp+94SIgkpZ\
-// KwIDAQAB";
-//     void* ret = oe_host_malloc(payload_in_transit.size());
-//     memcpy(ret, payload_in_transit.c_str(), payload_in_transit.size());
-//     return ret; 
-// }
 
 size_t get_payload_size(){
     //return name.size();
