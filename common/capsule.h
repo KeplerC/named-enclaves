@@ -4,6 +4,7 @@
 
 #include <string.h>
 #include <openenclave/enclave.h>
+#include "crypto.h"
 
 class CapsulePDU{
 public: 
@@ -41,15 +42,18 @@ private:
 
 class CapsuleAdvertise{
 public: 
-CapsuleAdvertise(void* buffer, size_t size){
-
+CapsuleAdvertise(evidence_t identity, pem_key_t public_key){
+    m_identity = identity;
+    m_public_key = public_key;
+    m_crypto = new Crypto();
+    m_crypto->Sha256(public_key.buffer, sizeof(public_key.buffer), m_name);
 }
 
 void* to_untrusted_string(){
-    //void* ret = oe_host_malloc(name.size());
-    //memcpy(ret, name.c_str(), name.size());
-    //return ret; 
-    return 0;
+    // void* ret = oe_host_malloc(name.size());
+    // memcpy(ret, name.c_str(), name.size());
+    // //return ret; 
+    return m_name;
 }
 
 size_t get_payload_size(){
@@ -58,9 +62,10 @@ size_t get_payload_size(){
 }
 
 private: 
-    uint8_t* name; //hash of metadata 
-    uint8_t* public_key; 
-    uint8_t* identity;
+    uint8_t m_name[32];//hash of metadata 
+    pem_key_t m_public_key; 
+    evidence_t m_identity;
+    Crypto* m_crypto; 
 }; 
 
 

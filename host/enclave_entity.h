@@ -14,6 +14,7 @@
 #include "log.h"
 #include "oe_helpers.h"
 
+
 // SGX Remote Attestation UUID.
 static oe_uuid_t sgx_remote_uuid = {OE_FORMAT_UUID_SGX_ECDSA};
 static uint32_t enclave_flags = OE_ENCLAVE_FLAG_DEBUG;
@@ -150,7 +151,8 @@ public:
         printf("Generating Identity");
         printf("=============================\n");
         generate_identity_report(format_id, "enclave_a", m_enclave, evidence, pem_key); 
-        //send(evidence); 
+
+        zmq::message_t* msg = new zmq::message_t(32);
     }
     
 
