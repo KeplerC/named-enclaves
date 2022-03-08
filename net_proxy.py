@@ -29,14 +29,42 @@ class CustomFormatter(logging.Formatter):
         formatter = logging.Formatter(log_fmt)
         return formatter.format(record)
 
-class Capsule_Net_Proxy():
+
+class RIB(): 
     def __init__(self):
-        self._publishers = {}
-        self._subscribers = {}
+        # Handle Logging 
+        self.logger = logging.getLogger("Routing_Information_Base")
+        self.logger.setLevel(logging.DEBUG)
+        ch = logging.StreamHandler()
+        ch.setLevel(logging.DEBUG)
+        ch.setFormatter(CustomFormatter())
+        self.logger.addHandler(ch)
+
+        self.rib = dict()
+        self.logger.warning("RIB started with empty cache")
+    
+    def handle_query(self, name):
+        if name in self.rib:
+            return self.rib[name]
+        else:
+            return -1
+
+    def handle_advertisement(self, name, advertise_pdu):
+        self.rib[name] = advertise_pdu
+        self.logger.warning("Capsule name " + name + " has been added to the RIB")
+
+    def dump_rib(self):
+         self.logger.debug(self.rib.__str__())
         
 
+
+class CapsuleNetProxy():
+    def __init__(self):
+
+        self.rib = RIB()
+        
         # Handle Logging 
-        self.logger = logging.getLogger("Capsule Network Proxy")
+        self.logger = logging.getLogger("Capsule_Network_Proxy")
         self.logger.setLevel(logging.DEBUG)
         ch = logging.StreamHandler()
         ch.setLevel(logging.DEBUG)
@@ -58,7 +86,7 @@ class Capsule_Net_Proxy():
 
         
     def receive(self):
-        self.logger.debug("Network Proxy Receiving Thread started")
+        self.logger.warning("Network Proxy Receiving Thread started")
         # Socket to talk to server
         context = zmq.Context()
         socket = context.socket(zmq.PULL)
@@ -75,8 +103,9 @@ class Capsule_Net_Proxy():
                 self.logger.warning("Received Advertisement in Hex: " + hash.hex())
                 pub_key = splitted[-2]
                 self.logger.debug(b"Received Pub Key: " + pub_key)
+                self.rib.handle_advertisement(hash.hex(), message)
                 
 
 
-c = Capsule_Net_Proxy()
+c = CapsuleNetProxy()
 time.sleep(1000)
