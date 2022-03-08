@@ -55,8 +55,11 @@ int get_evidence_with_public_key(
     pem_key_t* pem_key,
     evidence_t* evidence)
 {
-    return dispatcher.get_evidence_with_public_key(
+    int ret = 0;
+    ret = dispatcher.get_evidence_with_public_key(
         format_id, format_settings, pem_key, evidence);
+    
+    return ret;
 }
 
 // Attest and store the public key of another enclave.

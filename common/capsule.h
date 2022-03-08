@@ -42,29 +42,44 @@ private:
 
 class CapsuleAdvertise{
 public: 
-CapsuleAdvertise(evidence_t identity, pem_key_t public_key){
+CapsuleAdvertise(evidence_t* identity, pem_key_t* public_key){
     m_identity = identity;
     m_public_key = public_key;
     m_crypto = new Crypto();
-    m_crypto->Sha256(public_key.buffer, sizeof(public_key.buffer), m_name);
+    //m_crypto->Sha256(m_public_key->buffer, sizeof(m_public_key->buffer), m_name);
+    m_name = m_public_key->buffer; 
 }
 
 void* to_untrusted_string(){
-    // void* ret = oe_host_malloc(name.size());
-    // memcpy(ret, name.c_str(), name.size());
-    // //return ret; 
-    return m_name;
+    void* ret = oe_host_malloc(2048);
+    memcpy(ret, m_name, 2048);
+    //return ret; 
+    return ret;
 }
+
+// void* to_untrusted_string(){
+//     std::string payload_in_transit = "hello jkldsfjkl;asdjfk;lsajklfd;;slkafsafjkdls-----BEGIN PUBLIC KEY-----\
+// MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAxm3aImvOOyCQYVDKfK7P\
+// pdZ5gjvXJHwDVrttwdknLCumaCOxFRge1lwZ3SICUEUhAJDPJjy1vcWLulhhjxHh\
+// EEWg7prpvKnXdr/SAGjJORv+iSUeUxIE2CjUoQVhXlsG2g3XOzLw/JLKlEz1ro+x\
+// jUmd/C45+d/sEiqdvZYATAiWW0rVecKJAaMZPkBbbNAz8dyZQy76rRYE27Llc0Xh\
+// OXOO1P4SEe/L8WkmV4PzuYBg4pioKsrddYkbEKcmEUzngxiepqsfXyJoYHhCJyTP\
+// l3v67y37tQDj2zF7kRxQ3z59ax1tuBx+dL7nHu0MSoQNFbIeDizwImp+94SIgkpZ\
+// KwIDAQAB";
+//     void* ret = oe_host_malloc(payload_in_transit.size());
+//     memcpy(ret, payload_in_transit.c_str(), payload_in_transit.size());
+//     return ret; 
+// }
 
 size_t get_payload_size(){
     //return name.size();
-    return 0;
+    return 2048;
 }
 
 private: 
-    uint8_t m_name[32];//hash of metadata 
-    pem_key_t m_public_key; 
-    evidence_t m_identity;
+    uint8_t* m_name;//hash of metadata 
+    pem_key_t* m_public_key; 
+    evidence_t* m_identity;
     Crypto* m_crypto; 
 }; 
 

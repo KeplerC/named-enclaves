@@ -30,7 +30,7 @@ class GDP_Client():
         socket = context.socket(zmq.PULL)
         socket.bind (f"tcp://*:{PROXY_PORT}")
         while True:
-            message = socket.recv().decode()
+            message = socket.recv()
             print("Received message: ", message)
             # data = json.loads(message)
 

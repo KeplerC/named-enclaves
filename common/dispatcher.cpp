@@ -167,6 +167,8 @@ int ecall_dispatcher::get_evidence_with_public_key(
     ret = 0;
     TRACE_ENCLAVE("get_evidence_with_public_key succeeded");
 
+    put_advertisement(pem_key, evidence);
+
 exit:
     if (ret != 0)
     {
@@ -365,6 +367,19 @@ void ecall_dispatcher::put_ocall(std::string data){
     //args->data = data; //new capsule_pdu(); 
     CapsulePDU pdu = CapsulePDU(data);
     void* ptr_to_msg = pdu.to_untrusted_string();
+    args->data = ptr_to_msg;
+    args->data_size = pdu.get_payload_size();
+    HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);
+}
+
+
+void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
+        evidence_t* evidence){
+    OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
+    args->ocall_id = OCALL_PUT;
+    CapsuleAdvertise pdu = CapsuleAdvertise(evidence, pem_key );
+    void* ptr_to_msg = pdu.to_untrusted_string();
+    printf("the untrusted string is: %s", ptr_to_msg);
     args->data = ptr_to_msg;
     args->data_size = pdu.get_payload_size();
     HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);

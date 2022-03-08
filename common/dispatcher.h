@@ -63,6 +63,9 @@ class ecall_dispatcher
 
     void put_ocall(std::string data);
 
+    void put_advertisement(pem_key_t* pem_key,
+        evidence_t* evidence);
+
   private:
     bool initialize(const char* name);
 

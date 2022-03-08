@@ -73,7 +73,9 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
 
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
-                printf("[OCALL] dc data : %s\n", args->data);
+                printf("[OCALL] arg data arg ptr : %d\n", args);
+                printf("[OCALL] arg data size : %d\n", args->data_size);
+                printf("[OCALL] arg data size : %s\n", args->data);
                 msg = new zmq::message_t(args->data_size);
                 memcpy(msg->data(), args->data, args->data_size);
                 socket_ptr->send(*msg);
