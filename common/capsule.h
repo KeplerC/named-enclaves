@@ -46,13 +46,17 @@ CapsuleAdvertise(evidence_t* identity, pem_key_t* public_key){
     m_identity = identity;
     m_public_key = public_key;
     m_crypto = new Crypto();
-    //m_crypto->Sha256(m_public_key->buffer, sizeof(m_public_key->buffer), m_name);
-    m_name = m_public_key->buffer; 
+    metadata = std::string(reinterpret_cast<char*>(identity->buffer)) 
+                + "," + std::string(reinterpret_cast<char*>(public_key->buffer)); 
+    uint8_t metadata_in_c_str[metadata.size()];
+    strcpy((char*) metadata_in_c_str, metadata.c_str());  
+    m_crypto->Sha256(metadata_in_c_str, metadata.size(), m_name);
+    metadata += "," + std::string(reinterpret_cast<char*>(m_name));
 }
 
 void* to_untrusted_string(){
-    void* ret = oe_host_malloc(2048);
-    memcpy(ret, m_name, 2048);
+    void* ret = oe_host_malloc(metadata.size());
+    memcpy(ret, metadata.c_str(), 2048);
     //return ret; 
     return ret;
 }
@@ -73,13 +77,14 @@ void* to_untrusted_string(){
 
 size_t get_payload_size(){
     //return name.size();
-    return 2048;
+    return metadata.size();
 }
 
 private: 
-    uint8_t* m_name;//hash of metadata 
+    uint8_t m_name[32];//hash of metadata 
     pem_key_t* m_public_key; 
     evidence_t* m_identity;
+    std::string metadata; 
     Crypto* m_crypto; 
 }; 
 
