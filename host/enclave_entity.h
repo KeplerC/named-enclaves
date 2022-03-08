@@ -32,7 +32,7 @@ static void* thread_run_ecall_responder(void* hotMsgAsVoidP){
 }
 
 static void* thread_run_net_client(void* net_client){
-    ((NetworkClient*) net_client)->run();
+    ((NetworkClient*) net_client)->run_message_receiver();
     return NULL;
 }
 
@@ -150,6 +150,7 @@ public:
         printf("Generating Identity");
         printf("=============================\n");
         generate_identity_report(format_id, "enclave_a", m_enclave, evidence, pem_key); 
+        //send(evidence); 
     }
     
 

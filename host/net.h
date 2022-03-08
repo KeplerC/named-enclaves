@@ -10,7 +10,7 @@ class NetworkClient {
 
 public:
     NetworkClient(Enclave_Entity* enclave);
-    void run(); 
+    void run_message_receiver(); 
 
 private: 
     zmq::message_t string_to_message(const std::string& s);
@@ -19,8 +19,6 @@ private:
     void send_string(const std::string& s, zmq::socket_t* socket);
 
 private:
-    std::string local_proxy_ip = "localhost";
-    std::string local_proxy_port = "5005";
     Enclave_Entity* m_enclave_entity; 
 };
 

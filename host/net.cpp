@@ -10,8 +10,8 @@ NetworkClient::NetworkClient(Enclave_Entity* enclave){
 }
 
 
-
-void NetworkClient::run(){
+//thread polling from the network
+void NetworkClient::run_message_receiver(){
     zmq::context_t context (1);
     // socket for join requests
     zmq::socket_t socket_recv (context, ZMQ_PULL);
