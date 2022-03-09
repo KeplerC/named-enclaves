@@ -1,4 +1,4 @@
-
+#!/usr/bin/python3
 import zmq
 import time
 from threading import Thread
@@ -52,9 +52,10 @@ class RIB():
     def handle_advertisement(self, name, advertise_pdu):
         self.rib[name] = advertise_pdu
         self.logger.warning("Capsule name " + name + " has been added to the RIB")
+        self.dump_rib()
 
     def dump_rib(self):
-         self.logger.debug(self.rib.__str__())
+         self.logger.debug("Current RIB contains: " + self.rib.keys().__str__())
         
 class PeerManager:
     def __init__(self):
@@ -89,7 +90,7 @@ class PeerManager:
         self.logger.warning("Peer " + name + " upated")
         self.logger.info("Service %s updated, service info: %s" % (name, info))
         self.peers[name] = socket.inet_ntoa(info.addresses[0]) + ":" + str(info.port)
-        self.logger.info("Current peers: " + self.peers.__str__())
+        self.logger.info("Current peers: " + list(self.peers).__str__())
 
 from zeroconf import IPVersion, ServiceInfo, Zeroconf, ServiceBrowser
 import socket
@@ -116,6 +117,7 @@ class CapsuleNetProxy():
             self.m_unqiue_port = PROXY_PORT
         else:
             self.m_unqiue_port = random.randint(5005, 10000)
+        self.m_addr = "localhost:" + str(self.m_unqiue_port)
         
         self.m_unqiue_name = str(self.m_unqiue_port)
         info = ServiceInfo(
@@ -147,7 +149,8 @@ class CapsuleNetProxy():
         peers = self.peer_management.peers.values()
         self.logger.debug("The current peer list: " + peers.__str__())
         for peer in peers:
-            self.send(peer, message)
+            if peer != self.m_addr:
+                self.send(peer, message)
 
         
     def receive(self):
@@ -158,7 +161,6 @@ class CapsuleNetProxy():
         socket.bind (f"tcp://*:{self.m_unqiue_port}")
         while True:
             message = socket.recv()
-            print("received new message")
             splitted = message.split(b",,,")
             packet_type = splitted[0]
             if(packet_type == b"ADV"):
