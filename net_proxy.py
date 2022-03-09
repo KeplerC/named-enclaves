@@ -43,11 +43,11 @@ class RIB():
         self.rib = dict()
         self.logger.warning("RIB started with empty cache")
     
-    def handle_query(self, name):
+    def query(self, name):
         if name in self.rib:
             return self.rib[name]
         else:
-            return -1
+            return False
 
     def handle_advertisement(self, name, advertise_pdu):
         self.rib[name] = advertise_pdu
@@ -81,14 +81,14 @@ class PeerManager:
         info = zeroconf.get_service_info(type, name)
         self.logger.warning("Peer " + name + " joined")
         self.logger.info("Service %s added, service info: %s" % (name, info))
-        self.peers[name] = info
+        self.peers[name] = socket.inet_ntoa(info.addresses[0]) + ":" + str(info.port)
         self.logger.info("Current peers: " + self.peers.__str__())
 
     def update_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
         self.logger.warning("Peer " + name + " upated")
         self.logger.info("Service %s updated, service info: %s" % (name, info))
-        self.peers[name] = info
+        self.peers[name] = socket.inet_ntoa(info.addresses[0]) + ":" + str(info.port)
         self.logger.info("Current peers: " + self.peers.__str__())
 
 from zeroconf import IPVersion, ServiceInfo, Zeroconf, ServiceBrowser
@@ -119,8 +119,8 @@ class CapsuleNetProxy():
         
         self.m_unqiue_name = str(self.m_unqiue_port)
         info = ServiceInfo(
-            "_http._tcp.local.",
-            f"{self.m_unqiue_name}._http._tcp.local.",
+            "_capsule._udp.local.",
+            f"{self.m_unqiue_name}._capsule._udp.local.",
             addresses=[socket.inet_aton("127.0.0.1")],
             port=self.m_unqiue_port,
             #properties={'path': '/~paulsm/'},
@@ -128,22 +128,26 @@ class CapsuleNetProxy():
         )
         self.zeroconf = Zeroconf()
         self.zeroconf.register_service(info)
-        self.listener = PeerManager()
-        self.browser = ServiceBrowser(self.zeroconf, "_http._tcp.local.", self.listener)
+        self.peer_management = PeerManager()
+        self.browser = ServiceBrowser(self.zeroconf, "_capsule._udp.local.", self.peer_management)
                 
-
-        # get send context
-        self.context = zmq.Context()
-        self.socket = self.context.socket(zmq.PUSH)
 
         # start recv network thread
         thread = Thread(target = self.receive, args = ())
         thread.start()
 
-    def send(self, message):
-        self.socket.connect (f"tcp://localhost:{PROXY_PORT}")
-        print ("Send: " + message)
-        self.socket.send (("%s %s" % ("", message)).encode('utf-8'))
+    def send(self, address, message):
+        # get send context
+        self.context = zmq.Context()
+        self.socket = self.context.socket(zmq.PUSH)
+        self.socket.connect (f"tcp://" + address)
+        self.socket.send (message)
+
+    def broadcast(self, message):
+        peers = self.peer_management.peers.values()
+        self.logger.debug("The current peer list: " + peers.__str__())
+        for peer in peers:
+            self.send(peer, message)
 
         
     def receive(self):
@@ -154,18 +158,25 @@ class CapsuleNetProxy():
         socket.bind (f"tcp://*:{self.m_unqiue_port}")
         while True:
             message = socket.recv()
-            
+            print("received new message")
             splitted = message.split(b",,,")
             packet_type = splitted[0]
             if(packet_type == b"ADV"):
-                self.logger.debug(b"Advertisement: " + message[:100] + b"......" + message[-100:])
                 hash = splitted[-1]
+                # already in RIB, don't process the advertisement
+                if self.rib.query(hash.hex()):
+                    self.logger.warning("Advertisement " + hash.hex() + " in RIB, don't process")
+                    continue
+                self.logger.debug(b"Advertisement: " + message[:100] + b"......" + message[-100:])
                 self.logger.debug(b"Received Advertisement Hash: " + hash)
                 self.logger.warning("Received Advertisement in Hex: " + hash.hex())
                 pub_key = splitted[-2]
                 self.logger.debug(b"Received Pub Key: " + pub_key)
                 self.rib.handle_advertisement(hash.hex(), message)
-    
+                self.logger.warning("Broadcast "+ hash.hex() + " advertisement to other peers")
+                self.broadcast(message)
+
+
     def check_open_port(self, port_num):
         ret = True
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
