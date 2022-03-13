@@ -99,11 +99,11 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
 
 class Enclave_Entity{
 public:
-    Enclave_Entity(char* enclave_name){
+    Enclave_Entity(const char* enclave_name, const char* enclave_path){
         printf("\n=============================");
         printf("Initiating enclave %s", enclave_name);
         printf("=============================\n");
-        m_enclave = create_enclave("./enclave/enclave_a.signed", enclave_flags);; 
+        m_enclave = create_enclave(enclave_path, enclave_flags);; 
         if (m_enclave == NULL)
         {
             printf("Enclave creation failed!\n");

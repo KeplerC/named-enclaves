@@ -22,10 +22,10 @@ int main(int argc, const char* argv[])
     int ret = 1;
 
 
-    printf("Host: Creating enclaves\n");
+    printf("Host: Creating enclaves from path %s \n", argv[1]);
     
 
-    auto ee = Enclave_Entity("enclave_a");
+    auto ee = Enclave_Entity("enclave_a", argv[1]);
     ee.advertise();
     //ee.run();
 

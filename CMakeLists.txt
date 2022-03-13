@@ -38,6 +38,5 @@ if ((NOT DEFINED ENV{OE_SIMULATION}) OR (NOT $ENV{OE_SIMULATION}))
     runsgxremote
     DEPENDS attestation_host sign
     COMMAND
-      attestation_host sgxremote ${CMAKE_BINARY_DIR}/enclave/enclave.signed
-      ${CMAKE_BINARY_DIR}/enclave/enclave.signed)
+      attestation_host ${CMAKE_BINARY_DIR}/enclave/enclave_a.signed)
 endif ()
