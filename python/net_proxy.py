@@ -109,6 +109,7 @@ class CapsuleNetProxy():
                 #check and update RIB 
                 if not self.enclave_attached:
                     self.check_enclave_attached()
+                self.logger.debug(b"send message to enclave: " + message)
                 self.enclave_attached.send(message)
 
     def check_enclave_attached(self):

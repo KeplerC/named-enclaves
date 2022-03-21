@@ -16,7 +16,8 @@ public:
     }
 
     const std::string get(const std::string key) {
-            return htmap[key];
+        TRACE_ENCLAVE("[ENCLAVE RIB] getting %s from RIB", key.c_str());
+        return htmap[key];
     }
 };
 

@@ -446,12 +446,13 @@ std::vector<std::string> split(std::string const &str, const std::string delim
             auto splitted = split(s, ",,,");
 
             if(splitted[0] == "ADV"){
-                std::string adv_hash = splitted[splitted.size() -1];
-                std::cout << "Receive Advertisement" << ToHex(adv_hash, 1) << std::endl;
+                std::string adv_hash = ToHex(splitted[splitted.size() -1], 0);
+                std::cout << "Receive Advertisement" << adv_hash << std::endl;
                 this->m_rib.put(adv_hash, s);
             }else if(splitted[0] == "QUERY") {
+                //std::string query_hash = ToHex(splitted[splitted.size() -1], 0);
                 std::string query_hash = splitted[splitted.size() -1];
-                std::cout << "Receive QUERY" << ToHex(query_hash, 0) << std::endl;
+                std::cout << "Receive QUERY " << query_hash << std::endl;
                 auto ret = this->m_rib.get(query_hash);
                 if(ret != "")
                     put_ocall(ret);

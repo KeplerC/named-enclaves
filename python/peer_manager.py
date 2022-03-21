@@ -32,7 +32,7 @@ class PeerManager:
 
     def update_service(self, zeroconf, type, name):
         info = zeroconf.get_service_info(type, name)
-        self.logger.warning("Peer " + name + " upated")
+        self.logger.warning("Peer " + name + " updated")
         self.logger.info("Service %s updated, service info: %s" % (name, info))
         self.peers[name] = socket.inet_ntoa(info.addresses[0]) + ":" + str(info.port)
         self.logger.info("Current peers: " + list(self.peers).__str__())
