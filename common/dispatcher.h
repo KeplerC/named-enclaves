@@ -7,6 +7,7 @@
 #include "attestation.h"
 #include "crypto.h"
 #include "hot_msg_pass.h"
+#include "rib.h"
 #include <unordered_map>
 
 using namespace std;
@@ -28,7 +29,7 @@ class ecall_dispatcher
     enclave_config_data_t* m_enclave_config;
     //unsigned char m_other_enclave_signer_id[32];
 
-    std::unordered_map<std::string, std::string> rib; 
+    RIB m_rib; 
 
     HotMsg *ocall_circular_buffer;
     uint16_t requestedCallID = 0;

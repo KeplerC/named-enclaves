@@ -394,8 +394,8 @@ string ToHex(const string& s, bool upper_case /* = true */)
     ostringstream ret;
 
     for (string::size_type i = 0; i < s.length(); ++i)
+        //ret << std::hex << std::setfill('0') << std::setw(2) << (upper_case ? std::uppercase : std::nouppercase) << (int)s[i];
         ret << std::hex << std::setfill('0') << std::setw(2) << (upper_case ? std::uppercase : std::nouppercase) << (int)s[i];
-
     return ret.str();
 }
 
@@ -445,10 +445,9 @@ std::vector<std::string> split(std::string const &str, const std::string delim
             printf("[EnclaveMsgStartResponder] data is: %s\n", args->data);
             std::string s((char*)args->data, args->data_size);
             auto splitted = split(s, ",,,");
-            std::string token = splitted[splitted.size() -1];
-            std::cout << "the token is " << token <<  token.size() <<" " << ToHex(token, 1) << std::endl;
-            //std::cout << "the token is " << token;
-            //TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
+            std::string adv_hash = splitted[splitted.size() -1];
+            std::cout << "Receive Advertisement" << ToHex(adv_hash, 1) << std::endl;
+            this->m_rib.put(adv_hash, s);
             data_ptr->data = 0;
         }
 
