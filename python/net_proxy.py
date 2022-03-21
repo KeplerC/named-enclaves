@@ -2,95 +2,12 @@
 import zmq
 import time
 from threading import Thread
+from log import CustomFormatter
+from rib import RIB
+from peer_manager import PeerManager
+
 import logging 
-
 PROXY_PORT = 5555
-
-
-class CustomFormatter(logging.Formatter):
-
-    grey = "\x1b[38;20m"
-    yellow = "\x1b[33;20m"
-    red = "\x1b[31;20m"
-    bold_red = "\x1b[31;1m"
-    reset = "\x1b[0m"
-    format = "%(asctime)s - %(name)s - %(levelname)s - %(message)s (%(filename)s:%(lineno)d)"
-
-    FORMATS = {
-        logging.DEBUG: grey + format + reset,
-        logging.INFO: grey + format + reset,
-        logging.WARNING: yellow + format + reset,
-        logging.ERROR: red + format + reset,
-        logging.CRITICAL: bold_red + format + reset
-    }
-
-    def format(self, record):
-        log_fmt = self.FORMATS.get(record.levelno)
-        formatter = logging.Formatter(log_fmt)
-        return formatter.format(record)
-
-
-class RIB(): 
-    def __init__(self):
-        # Handle Logging 
-        self.logger = logging.getLogger("Routing_Information_Base")
-        self.logger.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        ch.setFormatter(CustomFormatter())
-        self.logger.addHandler(ch)
-
-        self.rib = dict()
-        self.logger.warning("RIB started with empty cache")
-    
-    def query(self, name):
-        if name in self.rib:
-            return self.rib[name]
-        else:
-            return False
-
-    def handle_advertisement(self, name, advertise_pdu):
-        self.rib[name] = advertise_pdu
-        self.logger.warning("Capsule name " + name + " has been added to the RIB")
-        self.dump_rib()
-
-    def dump_rib(self):
-         self.logger.debug("Current RIB contains: " + self.rib.keys().__str__())
-        
-class PeerManager:
-    def __init__(self):
-        # Handle Logging 
-        self.logger = logging.getLogger("Peer Manager")
-        self.logger.setLevel(logging.DEBUG)
-        ch = logging.StreamHandler()
-        ch.setLevel(logging.DEBUG)
-        ch.setFormatter(CustomFormatter())
-        self.logger.addHandler(ch)
-
-        # initiate peers 
-        self.peers = dict()
-        self.logger.warning("Peer Manager started")
-
-
-    def remove_service(self, zeroconf, type, name):
-        #print("Service %s removed" % (name,))
-        self.logger.warning("Peer " + name + " left")
-        del self.peers[name]
-        self.logger.info("Current peers: " + self.peers.__str__())
-
-    def add_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        self.logger.warning("Peer " + name + " joined")
-        self.logger.info("Service %s added, service info: %s" % (name, info))
-        self.peers[name] = socket.inet_ntoa(info.addresses[0]) + ":" + str(info.port)
-        self.logger.info("Current peers: " + self.peers.__str__())
-
-    def update_service(self, zeroconf, type, name):
-        info = zeroconf.get_service_info(type, name)
-        self.logger.warning("Peer " + name + " upated")
-        self.logger.info("Service %s updated, service info: %s" % (name, info))
-        self.peers[name] = socket.inet_ntoa(info.addresses[0]) + ":" + str(info.port)
-        self.logger.info("Current peers: " + list(self.peers).__str__())
 
 from zeroconf import IPVersion, ServiceInfo, Zeroconf, ServiceBrowser
 import socket
@@ -195,11 +112,3 @@ class CapsuleNetProxy():
 
 
 
-
-
-c = CapsuleNetProxy()
-
-try:
-    input()
-finally:
-    c.zeroconf.close()
