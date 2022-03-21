@@ -394,8 +394,7 @@ string ToHex(const string& s, bool upper_case /* = true */)
     ostringstream ret;
 
     for (string::size_type i = 0; i < s.length(); ++i)
-        //ret << std::hex << std::setfill('0') << std::setw(2) << (upper_case ? std::uppercase : std::nouppercase) << (int)s[i];
-        ret << std::hex << std::setfill('0') << std::setw(2) << (upper_case ? std::uppercase : std::nouppercase) << (int)s[i];
+        ret << std::hex << std::setfill('0') << std::setw(1) << (upper_case ? std::uppercase : std::nouppercase) <<  (unsigned int)(unsigned char)s[i];
     return ret.str();
 }
 
@@ -445,9 +444,17 @@ std::vector<std::string> split(std::string const &str, const std::string delim
             printf("[EnclaveMsgStartResponder] data is: %s\n", args->data);
             std::string s((char*)args->data, args->data_size);
             auto splitted = split(s, ",,,");
-            std::string adv_hash = splitted[splitted.size() -1];
-            std::cout << "Receive Advertisement" << ToHex(adv_hash, 1) << std::endl;
-            this->m_rib.put(adv_hash, s);
+
+            if(splitted[0] == "ADV"){
+                std::string adv_hash = splitted[splitted.size() -1];
+                std::cout << "Receive Advertisement" << ToHex(adv_hash, 1) << std::endl;
+                this->m_rib.put(adv_hash, s);
+            }else if(splitted[0] == "QUERY") {
+                std::string query_hash = splitted[splitted.size() -1];
+                std::cout << "Receive QUERY" << ToHex(query_hash, 0) << std::endl;
+                put_ocall(this->m_rib.get(query_hash));
+            }
+
             data_ptr->data = 0;
         }
 

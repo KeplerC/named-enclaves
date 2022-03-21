@@ -91,7 +91,7 @@ class CapsuleNetProxy():
                     continue
                 self.logger.debug(b"Advertisement: " + message[:100] + b"......" + message[-100:])
                 self.logger.debug(b"Received Advertisement Hash: " + hash)
-                self.logger.warning("Received Advertisement in Hex: " + hash.hex())
+                self.logger.warning("Received Advertisement in Hex: " + hash.hex('0', 2))
                 pub_key = splitted[-2]
                 self.logger.debug(b"Received Pub Key: " + pub_key)
                 self.rib.handle_advertisement(hash.hex(), message)
