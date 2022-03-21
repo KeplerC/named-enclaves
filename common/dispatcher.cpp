@@ -452,7 +452,11 @@ std::vector<std::string> split(std::string const &str, const std::string delim
             }else if(splitted[0] == "QUERY") {
                 std::string query_hash = splitted[splitted.size() -1];
                 std::cout << "Receive QUERY" << ToHex(query_hash, 0) << std::endl;
-                put_ocall(this->m_rib.get(query_hash));
+                auto ret = this->m_rib.get(query_hash);
+                if(ret != "")
+                    put_ocall(ret);
+                else
+                    TRACE_ENCLAVE("[EnclaveMsgStartResponder] Cannot find RIB entry");
             }
 
             data_ptr->data = 0;

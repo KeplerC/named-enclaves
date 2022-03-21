@@ -28,7 +28,7 @@ class CapsuleNetProxy():
         self.logger.addHandler(ch)
 
         # Handle RIB 
-        self.rib = RIB()
+        self.rib_cache = RIB()
 
         self.enclave_attached = None
 
@@ -72,7 +72,15 @@ class CapsuleNetProxy():
             if peer != self.m_addr:
                 self.send(peer, message)
 
-        
+    def query(self, query_name):
+        self.logger.debug("Querying name " + query_name)
+        if query_name in self.rib_cache.rib and False: 
+            self.logger.debug("Name is in RIB cache")
+        else:
+            self.logger.debug("Name is not in RIB cache, query ")
+            message = ("QUERY,,," + query_name).encode()
+            self.enclave_attached.send(message)
+            
     def receive(self):
         self.logger.warning("Network Proxy Receiving Thread started")
         # Socket to talk to server
@@ -86,7 +94,7 @@ class CapsuleNetProxy():
             if(packet_type == b"ADV"):
                 hash = splitted[-1]
                 # already in RIB, don't process the advertisement
-                if self.rib.query(hash.hex()):
+                if self.rib_cache.query(hash.hex()):
                     self.logger.warning("Advertisement " + hash.hex() + " in RIB, don't process")
                     continue
                 self.logger.debug(b"Advertisement: " + message[:100] + b"......" + message[-100:])
@@ -94,7 +102,7 @@ class CapsuleNetProxy():
                 self.logger.warning("Received Advertisement in Hex: " + hash.hex('0', 2))
                 pub_key = splitted[-2]
                 self.logger.debug(b"Received Pub Key: " + pub_key)
-                self.rib.handle_advertisement(hash.hex(), message)
+                self.rib_cache.handle_advertisement(hash.hex(), message)
                 self.logger.warning("Broadcast "+ hash.hex() + " advertisement to other peers")
                 self.broadcast(message)
 
