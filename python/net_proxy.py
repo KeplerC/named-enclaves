@@ -5,9 +5,11 @@ from threading import Thread
 from log import CustomFormatter
 from rib import RIB
 from peer_manager import PeerManager
+from enclave import Enclave
 
 import logging 
 PROXY_PORT = 5555
+LOCAL_NET_ENCLAVE_PORT = 5006
 
 from zeroconf import IPVersion, ServiceInfo, Zeroconf, ServiceBrowser
 import socket
@@ -28,6 +30,7 @@ class CapsuleNetProxy():
         # Handle RIB 
         self.rib = RIB()
 
+        self.enclave_attached = None
 
         # Handle Proxy
         if not self.check_open_port(PROXY_PORT):
@@ -95,6 +98,14 @@ class CapsuleNetProxy():
                 self.logger.warning("Broadcast "+ hash.hex() + " advertisement to other peers")
                 self.broadcast(message)
 
+                #check and update RIB 
+                if not self.enclave_attached:
+                    self.check_enclave_attached()
+                self.enclave_attached.send(message)
+
+    def check_enclave_attached(self):
+        if self.check_open_port(LOCAL_NET_ENCLAVE_PORT):
+            self.enclave_attached = Enclave(LOCAL_NET_ENCLAVE_PORT)
 
     def check_open_port(self, port_num):
         ret = True

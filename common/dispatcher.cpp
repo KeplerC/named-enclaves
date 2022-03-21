@@ -8,6 +8,10 @@
 #include <openenclave/enclave.h>
 #include "common.h"
 #include "capsule.h"
+#include <iostream>
+#include <vector>
+#include <iomanip> 
+#include <sstream>
 
 ecall_dispatcher::ecall_dispatcher(
     const char* name,
@@ -385,6 +389,31 @@ void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
     HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);
 }
 
+string ToHex(const string& s, bool upper_case /* = true */)
+{
+    ostringstream ret;
+
+    for (string::size_type i = 0; i < s.length(); ++i)
+        ret << std::hex << std::setfill('0') << std::setw(2) << (upper_case ? std::uppercase : std::nouppercase) << (int)s[i];
+
+    return ret.str();
+}
+
+std::vector<std::string> split(std::string const &str, const std::string delim
+            )
+{
+    size_t start;
+    size_t end = 0;
+    std::vector<std::string> out;
+ 
+    while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
+    {
+        end = str.find(delim, start);
+        out.push_back(str.substr(start, end - start));
+    }
+    return out; 
+}
+
   int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] started");
@@ -414,6 +443,11 @@ void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
             EcallParams * args = (EcallParams*) data_ptr->data;
             printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
             printf("[EnclaveMsgStartResponder] data is: %s\n", args->data);
+            std::string s((char*)args->data, args->data_size);
+            auto splitted = split(s, ",,,");
+            std::string token = splitted[splitted.size() -1];
+            std::cout << "the token is " << token <<  token.size() <<" " << ToHex(token, 1) << std::endl;
+            //std::cout << "the token is " << token;
             //TRACE_ENCLAVE("[EnclaveMsgStartResponder] Gotdata: %d\n", *result);
             data_ptr->data = 0;
         }

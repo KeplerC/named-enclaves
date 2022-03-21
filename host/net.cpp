@@ -26,9 +26,6 @@ void NetworkClient::run_message_receiver(){
         zmq::poll(pollitems.data(), pollitems.size(), 0);
 
         if (pollitems[0].revents & ZMQ_POLLIN){
-            //Get the address
-            //std::string msg = this->recv_string(&socket_recv);
-            //TRACE_ENCLAVE("[NetworkClient] Received Data to send to enclave: %s, %d", msg.c_str(), msg.size());
             zmq::message_t message;
             socket_recv.recv(&message);
             m_enclave_entity->ecall_send_to_enclave(message.data(), message.size());
