@@ -111,7 +111,8 @@ class CapsuleNetProxy():
                     self.check_enclave_attached()
                 self.logger.debug(b"send message to enclave: " + message)
                 self.enclave_attached.send(message)
-
+            if(packet_type == b"DATA"):
+                self.logger.warning("Received DATA from: ")
     def check_enclave_attached(self):
         if self.check_open_port(LOCAL_NET_ENCLAVE_PORT):
             self.enclave_attached = Enclave(LOCAL_NET_ENCLAVE_PORT)

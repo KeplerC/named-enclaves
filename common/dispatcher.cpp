@@ -369,7 +369,9 @@ void ecall_dispatcher::put_ocall(std::string data){
     OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
     args->ocall_id = OCALL_PUT;
     //args->data = data; //new capsule_pdu(); 
-    CapsulePDU pdu = CapsulePDU(data);
+    uint8_t* temp_sender_key = (uint8_t*) malloc(512  * sizeof(uint8_t));
+    this->m_crypto->retrieve_public_key(temp_sender_key);
+    CapsulePDU pdu = CapsulePDU(data, temp_sender_key, temp_sender_key);
     void* ptr_to_msg = pdu.to_untrusted_string();
     args->data = ptr_to_msg;
     args->data_size = pdu.get_payload_size();

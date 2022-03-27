@@ -12,10 +12,13 @@ CapsulePDU(void* buffer, size_t size){
 
 }
 
-CapsulePDU(std::string s){
+CapsulePDU(std::string s, uint8_t* src, uint8_t* dst){
     // payload = new uint8_t[metadata.size()];
     // strcpy((char*) payload, s.c_str());  
-    payload_in_transit = s;
+    receiver_name = dst; 
+    sender_name = src; 
+
+    payload = s; 
 }
 
 // void process_crypto(){
@@ -28,6 +31,11 @@ CapsulePDU(std::string s){
 // }
 
 void* to_untrusted_string(){
+    payload_in_transit =  std::string("DATA") + DELIM 
+        + std::string( receiver_name, receiver_name + 512)  + DELIM 
+        + std::string( sender_name, sender_name + 512)  + DELIM 
+        + payload;
+
     void* ret = oe_host_malloc(payload_in_transit.size());
     memcpy(ret, payload_in_transit.c_str(), payload_in_transit.size());
     return ret; 
@@ -38,11 +46,11 @@ size_t get_payload_size(){
 }
 
 private: 
-    std::string sender_name; 
-    std::string receiver_name; 
+    uint8_t* sender_name; 
+    uint8_t* receiver_name; 
 
     std::string payload_in_transit;
-    uint8_t* payload; 
+    std::string payload; 
     std::string signature;
 
     std::string prevHash; //Hash ptr to the previous record, not needed for the minimal prototype
