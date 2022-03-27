@@ -41,7 +41,7 @@ int get_enclave_format_settings(
 }
 
 void EnclaveSampleCode(){
-    dispatcher.put_ocall("hello");
+    dispatcher.put_capsule("hello");
 }
 
 /**

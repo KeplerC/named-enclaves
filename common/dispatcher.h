@@ -65,6 +65,8 @@ class ecall_dispatcher
       return 0;
     }
 
+
+    void put_capsule(std::string data);
     void put_ocall(std::string data);
 
     void put_advertisement(pem_key_t* pem_key,
