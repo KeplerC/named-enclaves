@@ -2,10 +2,17 @@
 #include "net.h"
 #include "enclave_entity.h"
 #include "log.h"
+#include <random>
 
 NetworkClient::NetworkClient(Enclave_Entity* enclave){
     {
         m_enclave_entity = enclave; 
+
+        int base_port = 3005;
+        int range = 5205 - base_port + 1;
+        m_port = rand() % range + base_port;
+
+        TRACE_ENCLAVE("[NetworkClient] Initialized with port: %d", m_port);
     }
 }
 
@@ -15,7 +22,7 @@ void NetworkClient::run_message_receiver(){
     zmq::context_t context (1);
     // socket for join requests
     zmq::socket_t socket_recv (context, ZMQ_PULL);
-    socket_recv.bind ("tcp://*:" + std::to_string(NET_CLIENT_RECV_PORT));
+    socket_recv.bind ("tcp://*:" + std::to_string(m_port));
     TRACE_ENCLAVE("[NetworkClient] Network Client thread started!");
 
     std::vector<zmq::pollitem_t> pollitems = {

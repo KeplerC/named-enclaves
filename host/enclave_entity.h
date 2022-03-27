@@ -25,6 +25,12 @@ struct enclave_responder_args {
 };
 
 
+struct ocall_responder_args {
+     NetworkClient* net_addr;
+     HotMsg *hotMsg;
+};
+
+
 static void* thread_run_ecall_responder(void* hotMsgAsVoidP){
     struct enclave_responder_args *args = (struct enclave_responder_args *) hotMsgAsVoidP;
     int ret = 0;
@@ -45,7 +51,12 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
     zmq::socket_t* socket_ptr  = new  zmq::socket_t( context, ZMQ_PUSH);
     socket_ptr -> connect ("tcp://" + std::string(NET_PROXY_IP) + ":" + std::string(NET_PROXY_PORT));
 
-    HotMsg *hotMsg = (HotMsg *) hot_msg_as_void_ptr;
+    struct ocall_responder_args *args = (struct ocall_responder_args *) hot_msg_as_void_ptr;
+    HotMsg *hotMsg = (HotMsg *) args->hotMsg;
+    NetworkClient *nc = (NetworkClient *) args->net_addr;
+    std::string m_address = nc->get_addr();
+    TRACE_ENCLAVE("Using Address: %s", m_address.c_str());
+
     int dataID = 0;
 
     static int i;
@@ -70,15 +81,22 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
           //Message exists!
           OcallParams *args = (OcallParams *) data_ptr->data; 
           zmq::message_t* msg;
+          std::string payload; 
 
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
                 printf("[OCALL-circular-buffer] arg data arg ptr : %d\n", args);
                 printf("[OCALL-circular-buffer] arg data size : %d\n", args->data_size);
                 printf("[OCALL-circular-buffer] arg data size : %s\n", args->data);
-                msg = new zmq::message_t(args->data_size);
-                memcpy(msg->data(), args->data, args->data_size);
+                // msg = new zmq::message_t(args->data_size);
+                // memcpy(msg->data(), args->data, args->data_size);
+                // socket_ptr->send(*msg);
+
+                payload = std::string((char*) args->data, args->data_size) + ",,," + m_address;
+                msg = new zmq::message_t(payload.size());
+                memcpy(msg->data(), payload.c_str(), payload.size());
                 socket_ptr->send(*msg);
+
                 printf("[OCALL-circular-buffer] dc data : %s\n", msg->data());
                 break;
             default:
@@ -112,6 +130,9 @@ public:
         
         //initialize network client thread
         m_net = new NetworkClient(this);
+
+        // m_addr = "localhost:" + std::to_string(m_net -> get_port());
+        // TRACE_ENCLAVE("Using Address: %s", m_addr.c_str());
         int result = pthread_create(&m_net_client_thread, NULL, thread_run_net_client, (void*)m_net);
         if (0 != result)
         {
@@ -137,7 +158,9 @@ public:
         }
 
         SetOcallBuffer(m_enclave, &result, circ_buffer_host);
-        result = pthread_create(&circ_buffer_host->responderThread, NULL, StartOcallResponder, (void*) circ_buffer_host);
+
+        o_responder_args = {m_net, circ_buffer_host};
+        result = pthread_create(&circ_buffer_host->responderThread, NULL, StartOcallResponder, (void*) &o_responder_args);
         if (0 != result)
         {
             fprintf(stderr, ("pthread_create() failed with error #%d: '%s'\n", result, strerror(result)));
@@ -154,7 +177,6 @@ public:
         printf("=============================\n");
         generate_identity_report(format_id, "enclave_a", m_enclave, evidence, pem_key); 
 
-        zmq::message_t* msg = new zmq::message_t(32);
     }
     
 
@@ -173,6 +195,8 @@ public:
         printf("[start_ecall] id is: %d\n",requestedCallID);
         HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args);
     }
+
+    std::string m_addr; 
 private: 
     oe_enclave_t* m_enclave; 
     // circular buffer
@@ -181,12 +205,15 @@ private:
     uint16_t requestedCallID = 0;
     // networking 
     struct enclave_responder_args e_responder_args;
+    struct ocall_responder_args o_responder_args;
     NetworkClient* m_net;
     pthread_t m_net_client_thread;
     //identity related 
     oe_uuid_t* format_id = &sgx_remote_uuid;
     evidence_t evidence = {0};
     pem_key_t pem_key = {0};
+
+    
 
 private: 
     oe_enclave_t* create_enclave(const char* enclave_path, uint32_t flags)

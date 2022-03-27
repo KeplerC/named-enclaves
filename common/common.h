@@ -26,7 +26,6 @@
 #define __COMMON_H
 
 
-#define NET_CLIENT_RECV_PORT 5006
 #define NET_PROXY_IP "localhost"
 #define NET_PROXY_PORT "5555"
 typedef volatile uint32_t sgx_spinlock_t;
