@@ -369,9 +369,7 @@ void ecall_dispatcher::put_ocall(std::string data){
     OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
     args->ocall_id = OCALL_PUT;
     //args->data = data; //new capsule_pdu(); 
-    uint8_t* temp_sender_key = (uint8_t*) malloc(512  * sizeof(uint8_t));
-    this->m_crypto->retrieve_public_key(temp_sender_key);
-    CapsulePDU pdu = CapsulePDU(data, temp_sender_key, temp_sender_key);
+    CapsulePDU pdu = CapsulePDU(data, m_name, m_name);
     void* ptr_to_msg = pdu.to_untrusted_string();
     args->data = ptr_to_msg;
     args->data_size = pdu.get_payload_size();
@@ -379,11 +377,13 @@ void ecall_dispatcher::put_ocall(std::string data){
 }
 
 
+
 void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
         evidence_t* evidence){
     OcallParams* args = (OcallParams*)oe_host_malloc(sizeof(OcallParams)); 
     args->ocall_id = OCALL_PUT;
     CapsuleAdvertise pdu = CapsuleAdvertise(evidence, pem_key );
+    this->m_name = pdu.get_my_hash();
     void* ptr_to_msg = pdu.to_untrusted_string();
     printf("the untrusted string is: %s", ptr_to_msg);
     args->data = ptr_to_msg;

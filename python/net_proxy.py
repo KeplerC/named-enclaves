@@ -99,20 +99,33 @@ class CapsuleNetProxy():
                     continue
                 self.logger.debug(b"Advertisement: " + message[:100] + b"......" + message[-100:])
                 self.logger.debug(b"Received Advertisement Hash: " + hash)
-                self.logger.warning("Received Advertisement in Hex: " + hash.hex('0', 2))
+                self.logger.warning("Received Advertisement in Hex: " + hash.hex())
                 pub_key = splitted[-2]
                 self.logger.debug(b"Received Pub Key: " + pub_key)
-                self.rib_cache.handle_advertisement(hash.hex(), message)
+
+                from_addr = "localhost:" + str(LOCAL_NET_ENCLAVE_PORT) #TODO: change it with real IP pointers
+                self.rib_cache.handle_advertisement(hash.hex(), message, from_addr)
                 self.logger.warning("Broadcast "+ hash.hex() + " advertisement to other peers")
                 self.broadcast(message)
 
                 #check and update RIB 
                 if not self.enclave_attached:
                     self.check_enclave_attached()
-                self.logger.debug(b"send message to enclave: " + message)
+                
                 self.enclave_attached.send(message)
+
             if(packet_type == b"DATA"):
-                self.logger.warning("Received DATA from: ")
+                print(splitted)
+                receiver = splitted[1].hex() 
+                sender = splitted[2].hex() 
+                data = splitted[3].decode()
+                self.logger.warning("[DATA] Receiver: " +  receiver + " Sender: " + sender + " Data: " + data)
+
+                
+                dst = self.rib_cache.query(receiver)
+                self.send(dst, message)
+
+
     def check_enclave_attached(self):
         if self.check_open_port(LOCAL_NET_ENCLAVE_PORT):
             self.enclave_attached = Enclave(LOCAL_NET_ENCLAVE_PORT)
