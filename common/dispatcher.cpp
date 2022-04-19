@@ -8,6 +8,7 @@
 #include <openenclave/enclave.h>
 #include "common.h"
 #include "capsule.h"
+#include "duktape/duktape.h"
 #include <iostream>
 #include <vector>
 #include <iomanip> 
@@ -427,7 +428,7 @@ std::vector<std::string> split(std::string const &str, const std::string delim
     return out; 
 }
 
-  int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
+int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] started");
     int dataID = 0;
@@ -485,3 +486,10 @@ std::vector<std::string> split(std::string const &str, const std::string delim
     }
     return 0;
   }
+
+
+void test_js(){
+    duk_context *ctx = duk_create_heap_default();
+    //duk_init_mem_interface(ctx); 
+    duk_eval_string(ctx, "1+1;");
+}
