@@ -1,18 +1,20 @@
 // Copyright (c) Open Enclave SDK contributors.
 // Licensed under the MIT License.
 
-#include "dispatcher.h"
 #include <openenclave/attestation/attester.h>
 #include <openenclave/attestation/sgx/report.h>
 #include <openenclave/attestation/verifier.h>
 #include <openenclave/enclave.h>
-#include "common.h"
-#include "capsule.h"
-#include "duktape/duktape.h"
 #include <iostream>
 #include <vector>
 #include <iomanip> 
 #include <sstream>
+#include "dispatcher.h"
+#include "common.h"
+#include "capsule.h"
+#include "net_roles.h"
+#include "duktape/duktape.h"
+
 
 ecall_dispatcher::ecall_dispatcher(
     const char* name,
@@ -404,33 +406,12 @@ void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
     HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);
 }
 
-string ToHex(const string& s, bool upper_case /* = true */)
-{
-    ostringstream ret;
 
-    for (string::size_type i = 0; i < s.length(); ++i)
-        ret << std::hex << std::setfill('0') << std::setw(1) << (upper_case ? std::uppercase : std::nouppercase) <<  (unsigned int)(unsigned char)s[i];
-    return ret.str();
-}
-
-std::vector<std::string> split(std::string const &str, const std::string delim
-            )
-{
-    size_t start;
-    size_t end = 0;
-    std::vector<std::string> out;
- 
-    while ((start = str.find_first_not_of(delim, end)) != std::string::npos)
-    {
-        end = str.find(delim, start);
-        out.push_back(str.substr(start, end - start));
-    }
-    return out; 
-}
-
+// recv-ed packet handling 
 int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] started");
+    gdp_router* proc_pkt_role = new gdp_router(this);
     int dataID = 0;
 
     static int i;
@@ -458,23 +439,7 @@ int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
             printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
             printf("[EnclaveMsgStartResponder] data is: %s\n", args->data);
             std::string s((char*)args->data, args->data_size);
-            auto splitted = split(s, ",,,");
-
-            if(splitted[0] == "ADV"){
-                std::string adv_hash = ToHex(splitted[splitted.size() -1], 0);
-                std::cout << "Receive Advertisement" << adv_hash << std::endl;
-                this->m_rib.put(adv_hash, s);
-            }else if(splitted[0] == "QUERY") {
-                //std::string query_hash = ToHex(splitted[splitted.size() -1], 0);
-                std::string query_hash = splitted[splitted.size() -1];
-                std::cout << "Receive QUERY " << query_hash << std::endl;
-                auto ret = this->m_rib.get(query_hash);
-                if(ret != "")
-                    put_ocall(ret);
-                else
-                    TRACE_ENCLAVE("[EnclaveMsgStartResponder] Cannot find RIB entry");
-            }
-
+            proc_pkt_role->proc_packet(s);
             data_ptr->data = 0;
         }
 
