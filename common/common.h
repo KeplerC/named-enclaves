@@ -25,6 +25,8 @@
 #ifndef __COMMON_H
 #define __COMMON_H
 
+#define ATTESTATION_SIM_MODE true // the simulation mode for identity report, for non azure or SGX2 machines
+
 
 #define NET_PROXY_IP "localhost"
 #define NET_PROXY_PORT "5555"

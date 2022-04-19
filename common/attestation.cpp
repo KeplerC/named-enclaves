@@ -107,8 +107,12 @@ bool Attestation::generate_attestation_evidence(
     TRACE_ENCLAVE(
         "serialized custom claims buffer size: %lu", custom_claims_buffer_size);
 
-    // Generate evidence based on the format selected by the attester.
-    result = oe_get_evidence(
+    if(ATTESTATION_SIM_MODE){
+        result = OE_OK; 
+        evidence = &custom_claims_buffer; 
+        evidence_size = &custom_claims_buffer_size;
+    }else{
+        result = oe_get_evidence(
         format_id,
         0,
         custom_claims_buffer,
@@ -119,6 +123,9 @@ bool Attestation::generate_attestation_evidence(
         evidence_size,
         nullptr,
         0);
+    }
+    // Generate evidence based on the format selected by the attester.
+
     if (result != OE_OK)
     {
         TRACE_ENCLAVE("oe_get_evidence failed.(%s)", oe_result_str(result));
