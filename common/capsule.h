@@ -12,30 +12,55 @@ CapsulePDU(void* buffer, size_t size){
 
 }
 
-CapsulePDU(std::string s, std::string src, std::string dst){
+CapsulePDU(std::string s, std::string src, std::string dst, Crypto* crypto){
     // payload = new uint8_t[metadata.size()];
     // strcpy((char*) payload, s.c_str());  
     receiver_name = dst; 
     sender_name = src; 
 
     payload = s; 
+    m_crypto = crypto; 
 }
 
-// void process_crypto(){
-//     //encrypt: 
-//     m_crypto->Sha256(metadata_in_c_str, metadata.size(), m_name);
-//     //metadata += "," + std::string(reinterpret_cast<char*>(m_name));
-//     metadata += "," + std::string( m_name, m_name + 32);
+void process_crypto(){
 
-//     //hash:
-// }
-
-void* to_untrusted_string(){
     payload_in_transit =  std::string("DATA") + DELIM 
         + receiver_name + DELIM 
         + sender_name  + DELIM 
         + payload;
+    //encrypt: 
+    uint8_t payload_in_transit_in_c_str[payload_in_transit.size()];
+    strcpy((char*) payload_in_transit_in_c_str, payload_in_transit.c_str());  
+    //m_crypto->Sha256(payload_in_transit_in_c_str, payload_in_transit.size(), m_name);
+    uint8_t pem_public_key[512]; 
+    uint8_t encrypted_data_buffer[1024];
+    size_t encrypted_data_size = sizeof(encrypted_data_buffer);
+    m_crypto->retrieve_public_key(pem_public_key);
+    m_crypto->Encrypt(
+        pem_public_key,
+        payload_in_transit_in_c_str,
+        payload_in_transit.size(),
+        encrypted_data_buffer,
+        &encrypted_data_size);
+    
 
+    TRACE_ENCLAVE("Encrypted data: %s", encrypted_data_buffer);
+
+    uint8_t data[1024];
+    size_t data_size = 0;
+    int ret = 1;
+    data_size = sizeof(data);
+    m_crypto->decrypt(encrypted_data_buffer,encrypted_data_size, data, &data_size); 
+    TRACE_ENCLAVE("data: %s", data);
+    
+}
+
+void* to_untrusted_string(){
+    // payload_in_transit =  std::string("DATA") + DELIM 
+    //     + receiver_name + DELIM 
+    //     + sender_name  + DELIM 
+    //     + payload;
+    process_crypto(); 
     void* ret = oe_host_malloc(payload_in_transit.size());
     memcpy(ret, payload_in_transit.c_str(), payload_in_transit.size());
     return ret; 

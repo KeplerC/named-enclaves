@@ -33,8 +33,7 @@ protected:
         return ret.str();
     }
 
-    std::vector<std::string> split(std::string const &str, const std::string delim
-                )
+    std::vector<std::string> split(std::string const &str, const std::string delim)
     {
         size_t start;
         size_t end = 0;
@@ -57,7 +56,7 @@ public:
     
     void proc_adv(std::vector<std::string> splitted, std::string advertisement) override {
         std::string adv_hash = ToHex(splitted[splitted.size() -1], 0);
-        std::cout << "Receive Advertisement" << adv_hash << std::endl;
+        TRACE_ENCLAVE("[GDP ROUTER] Receive Advertisement %s", adv_hash.c_str());
         this->m_rib.put(adv_hash, advertisement);
     }
     void proc_query(std::vector<std::string> splitted) override {
@@ -68,7 +67,7 @@ public:
         if(ret != "")
             m_dispatcher->put_ocall(ret);
         else
-            TRACE_ENCLAVE("[EnclaveMsgStartResponder] Cannot find RIB entry");
+            TRACE_ENCLAVE("[GDP ROUTER] Cannot find RIB entry");
     }
     void proc_data(std::vector<std::string> splitted) override{
 
