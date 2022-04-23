@@ -11,9 +11,39 @@ import logging
 PROXY_PORT = 5555
 LOCAL_NET_ENCLAVE_PORT = 5006
 
-from zeroconf import IPVersion, ServiceInfo, Zeroconf, ServiceBrowser
 import socket
 import random
+import asyncio
+from kademlia.network import Server
+
+SERVER_PORT = 8468
+
+
+
+
+async def put_key_value(boot_strap_server, key, value):
+    # Create a node and start listening on port 5678
+    node = Server()
+    await node.listen(5678)
+    await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+    #await node.listen(SERVER_PORT)
+
+   # await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+
+    # set a value for the key "my-key" on the network
+    await node.set(key, value)
+
+async def get_key_value(boot_strap_server, key):
+    # Create a node and start listening on port 5678
+    #await node.listen(SERVER_PORT)
+    node = Server()
+    await node.listen(8765)
+    await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+    #await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+
+    # get the value associated with "my-key" from the network
+    return await node.get(key)
+
 
 
 class CapsuleNetProxy():
@@ -40,19 +70,10 @@ class CapsuleNetProxy():
         self.m_addr = "localhost:" + str(self.m_unqiue_port)
         
         self.m_unqiue_name = str(self.m_unqiue_port)
-        info = ServiceInfo(
-            "_capsule._udp.local.",
-            f"{self.m_unqiue_name}._capsule._udp.local.",
-            addresses=[socket.inet_aton("127.0.0.1")],
-            port=self.m_unqiue_port,
-            #properties={'path': '/~paulsm/'},
-            server="ash-2.local."
-        )
-        self.zeroconf = Zeroconf()
-        self.zeroconf.register_service(info)
         self.peer_management = PeerManager()
-        self.browser = ServiceBrowser(self.zeroconf, "_capsule._udp.local.", self.peer_management)
-                
+
+        asyncio.run(put_key_value("128.32.37.74", "/tmp/local_updates", "gradients....updates"))
+        asyncio.run(get_key_value("128.32.37.74", "/tmp/local_updates"))
 
         # start recv network thread
         thread = Thread(target = self.receive, args = ())

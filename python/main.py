@@ -8,4 +8,4 @@ try:
         s = input("Enter your RIB query: ")
         c.query(s)
 finally:
-    c.zeroconf.close()
+    pass
