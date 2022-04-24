@@ -14,12 +14,15 @@ LOCAL_NET_ENCLAVE_PORT = 5006
 import socket
 import random
 import asyncio
-from kademlia.network import Server
+from kademlia import Server
 
 SERVER_ADDR = "128.32.37.74"
 SERVER_PORT = 8468
 
-
+def get_external_ip():
+    from requests import get
+    ip = get('https://api.ipify.org').content.decode('utf8')
+    return ip
 
 
 async def put_key_value(boot_strap_server, key, value):
@@ -33,6 +36,7 @@ async def put_key_value(boot_strap_server, key, value):
 
     # set a value for the key "my-key" on the network
     await node.set(key, value)
+    node.stop()
 
 async def get_key_value(boot_strap_server, key):
     # Create a node and start listening on port 5678
@@ -44,6 +48,7 @@ async def get_key_value(boot_strap_server, key):
 
     # get the value associated with "my-key" from the network
     return await node.get(key)
+    node.stop()
 
 
 
@@ -93,13 +98,14 @@ class CapsuleNetProxy():
 
     def query(self, query_name):
         self.logger.debug("Querying name " + query_name)
-        #asyncio.run(get_key_value(SERVER_ADDR, query_name))
-        if query_name in self.rib_cache.rib: 
+        if query_name in self.rib_cache.rib and False: 
             self.logger.debug("Name is in RIB cache")
-        else:
-            self.logger.debug("Name is not in RIB cache, query ")
-            message = ("QUERY,,," + query_name).encode()
-            self.enclave_attached.send(message)
+        else: 
+            ret = asyncio.run(get_key_value(SERVER_ADDR, query_name))
+            if not ret: 
+                self.logger.debug("Name is not in RIB cache, query ")
+                message = ("QUERY,,," + query_name).encode()
+                self.enclave_attached.send(message)
             
     def receive(self):
         global LOCAL_NET_ENCLAVE_PORT
@@ -137,9 +143,9 @@ class CapsuleNetProxy():
                 self.logger.warning("Enclave attached with " + str(LOCAL_NET_ENCLAVE_PORT))
                 
                 self.enclave_attached.send(message)
-                self.benchmark() 
+                # self.benchmark() 
 
-                #asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
+                asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
 
             if(packet_type == b"DATA"):
                 print(splitted)
