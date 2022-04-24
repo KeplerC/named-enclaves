@@ -93,8 +93,8 @@ class CapsuleNetProxy():
 
     def query(self, query_name):
         self.logger.debug("Querying name " + query_name)
-        asyncio.run(get_key_value(SERVER_ADDR, query_name))
-        if query_name in self.rib_cache.rib and False: 
+        #asyncio.run(get_key_value(SERVER_ADDR, query_name))
+        if query_name in self.rib_cache.rib: 
             self.logger.debug("Name is in RIB cache")
         else:
             self.logger.debug("Name is not in RIB cache, query ")
@@ -137,8 +137,9 @@ class CapsuleNetProxy():
                 self.logger.warning("Enclave attached with " + str(LOCAL_NET_ENCLAVE_PORT))
                 
                 self.enclave_attached.send(message)
+                self.benchmark() 
 
-                asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
+                #asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
 
             if(packet_type == b"DATA"):
                 print(splitted)
@@ -172,6 +173,21 @@ class CapsuleNetProxy():
             ret =  False
         sock.close()
         return ret 
+
+
+    def benchmark(self):
+        self.benchmark_switch()
+
+    def fake_datagram(self, size = 20):
+        return b"DATA,,,xklzjCx,,,dksjfljsld,,," + b"s" * size + b"localhost:5030"
+
+    def benchmark_switch(self):
+        self.logger.warning("running switch benchmark")
+        datagram = self.fake_datagram()
+        print(datagram)
+        for i in range(5):
+            self.enclave_attached.send(datagram)
+
 
 
 

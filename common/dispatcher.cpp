@@ -411,7 +411,7 @@ void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
 int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] started");
-    gdp_router* proc_pkt_role = new gdp_router(this);
+    gdp_switch* proc_pkt_role = new gdp_switch(this);
     int dataID = 0;
 
     static int i;

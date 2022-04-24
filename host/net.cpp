@@ -35,6 +35,7 @@ void NetworkClient::run_message_receiver(){
         if (pollitems[0].revents & ZMQ_POLLIN){
             zmq::message_t message;
             socket_recv.recv(&message);
+            TRACE_ENCLAVE("[NetworkClient] Receive %s",message.data() );
             m_enclave_entity->ecall_send_to_enclave(message.data(), message.size());
         }
     }

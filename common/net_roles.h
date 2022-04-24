@@ -70,7 +70,23 @@ public:
             TRACE_ENCLAVE("[GDP ROUTER] Cannot find RIB entry");
     }
     void proc_data(std::vector<std::string> splitted) override{
+ 
+    }
+private: 
+    RIB m_rib; 
+};
 
+
+class gdp_switch: public net_role
+{
+public:
+    gdp_switch(ecall_dispatcher* dispatcher) : net_role(dispatcher) {} 
+    
+    void proc_adv(std::vector<std::string> splitted, std::string advertisement) override {
+    }
+    void proc_query(std::vector<std::string> splitted) override {
+    }
+    void proc_data(std::vector<std::string> splitted) override{
     }
 private: 
     RIB m_rib; 
