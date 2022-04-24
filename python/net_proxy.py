@@ -148,7 +148,6 @@ class CapsuleNetProxy():
                 data = splitted[3].decode()
                 self.logger.warning("[DATA] Receiver: " +  receiver + " Sender: " + sender + " Data: " + data)
 
-                
                 dst = self.rib_cache.query(receiver)
                 self.send(dst, message)
 
@@ -179,14 +178,14 @@ class CapsuleNetProxy():
         self.benchmark_switch()
 
     def fake_datagram(self, size = 20):
-        return b"DATA,,,xklzjCx,,,dksjfljsld,,," + b"s" * size + b"localhost:5030"
+        return b"DATA,,,xklzjCx,,,dksjfljsld,,," + b"s" * size + b",,,localhost:5030"
 
     def benchmark_switch(self):
         self.logger.warning("running switch benchmark")
         datagram = self.fake_datagram()
         print(datagram)
-        for i in range(5):
-            self.enclave_attached.send(datagram)
+        #for i in range(5):
+        self.enclave_attached.send(datagram)
 
 
 

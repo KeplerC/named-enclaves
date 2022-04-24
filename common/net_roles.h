@@ -18,6 +18,9 @@ public:
         else if(splitted[0] == "QUERY") {
             proc_query(splitted); 
         }
+        else if(splitted[0] == "DATA") {
+            proc_data(splitted); 
+        }
     }
     virtual void proc_adv(std::vector<std::string> splitted, std::string advertisement) = 0;
     virtual void proc_query(std::vector<std::string> splitted) = 0;
@@ -87,6 +90,8 @@ public:
     void proc_query(std::vector<std::string> splitted) override {
     }
     void proc_data(std::vector<std::string> splitted) override{
+        TRACE_ENCLAVE("[GDP Switch] Got Data %s",  splitted[3].c_str());
+        m_dispatcher->put_capsule(splitted[3].c_str());
     }
 private: 
     RIB m_rib; 
