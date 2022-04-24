@@ -16,6 +16,7 @@ import random
 import asyncio
 from kademlia.network import Server
 
+SERVER_ADDR = "128.32.37.74"
 SERVER_PORT = 8468
 
 
@@ -72,9 +73,6 @@ class CapsuleNetProxy():
         self.m_unqiue_name = str(self.m_unqiue_port)
         self.peer_management = PeerManager()
 
-        asyncio.run(put_key_value("128.32.37.74", "/tmp/local_updates", "gradients....updates"))
-        asyncio.run(get_key_value("128.32.37.74", "/tmp/local_updates"))
-
         # start recv network thread
         thread = Thread(target = self.receive, args = ())
         thread.start()
@@ -95,6 +93,7 @@ class CapsuleNetProxy():
 
     def query(self, query_name):
         self.logger.debug("Querying name " + query_name)
+        asyncio.run(get_key_value(SERVER_ADDR, query_name))
         if query_name in self.rib_cache.rib and False: 
             self.logger.debug("Name is in RIB cache")
         else:
@@ -127,8 +126,8 @@ class CapsuleNetProxy():
 
                 from_addr = splitted[-1].decode()
                 self.rib_cache.handle_advertisement(hash.hex(), message, from_addr)
-                self.logger.warning("Broadcast "+ hash.hex() + " advertisement to other peers")
-                self.broadcast(message)
+                #self.logger.warning("Broadcast "+ hash.hex() + " advertisement to other peers")
+                #self.broadcast(message)
 
                 #check and update RIB 
                 if not self.enclave_attached:
@@ -138,6 +137,8 @@ class CapsuleNetProxy():
                 self.logger.warning("Enclave attached with " + str(LOCAL_NET_ENCLAVE_PORT))
                 
                 self.enclave_attached.send(message)
+
+                asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
 
             if(packet_type == b"DATA"):
                 print(splitted)
