@@ -85,9 +85,9 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
 
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
-                printf("[OCALL-circular-buffer] arg data arg ptr : %d\n", args);
-                printf("[OCALL-circular-buffer] arg data size : %d\n", args->data_size);
-                printf("[OCALL-circular-buffer] arg data size : %s\n", args->data);
+                // printf("[OCALL-circular-buffer] arg data arg ptr : %d\n", args);
+                // printf("[OCALL-circular-buffer] arg data size : %d\n", args->data_size);
+                // printf("[OCALL-circular-buffer] arg data size : %s\n", args->data);
                 // msg = new zmq::message_t(args->data_size);
                 // memcpy(msg->data(), args->data, args->data_size);
                 // socket_ptr->send(*msg);
@@ -97,7 +97,7 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
                 memcpy(msg->data(), payload.c_str(), payload.size());
                 socket_ptr->send(*msg);
 
-                printf("[OCALL-circular-buffer] dc data : %s\n", msg->data());
+                // printf("[OCALL-circular-buffer] dc data : %s\n", msg->data());
                 break;
             default:
                 printf("Invalid ECALL id: %d\n", args->ocall_id);
@@ -192,7 +192,7 @@ public:
         args->ecall_id = ECALL_PUT;
         args->data = data;
         args->data_size = data_size; 
-        printf("[start_ecall] id is: %d\n",requestedCallID);
+        // printf("[start_ecall] id is: %d\n",requestedCallID);
         HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args);
     }
 

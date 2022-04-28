@@ -106,14 +106,14 @@ static inline int HotMsg_requestECall( HotMsg* hotMsg, int dataID, void *data )
 
         HotData* data_ptr = (HotData*) hotMsg -> MsgQueue[data_index];
         __sgx_spin_lock( &data_ptr->spinlock );
-        printf("[HotMsg_requestECall] keep polling: %d\n", hotMsg->keepPolling);
+        //printf("[HotMsg_requestECall] keep polling: %d\n", hotMsg->keepPolling);
 
         if( data_ptr-> isRead == true ) {
             data_ptr-> isRead  = false;
             data_ptr->data = data;
             // data_capsule_t *clarg = (data_capsule_t *) data; 
             EcallParams * args = (EcallParams*) data;
-            printf("[HotMsg_requestECall] data is: %s\n", args->data);
+            //printf("[HotMsg_requestECall] data is: %s\n", args->data);
             __sgx_spin_unlock( &data_ptr->spinlock );
             break;
         }

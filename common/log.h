@@ -9,12 +9,12 @@
 extern const char* enclave_name;
 
 #define TRACE_ENCLAVE(fmt, ...)     \
-                                    \
-    printf(                         \
-        "%s: ***%s(%d): " fmt "\n", \
-        enclave_name,               \
-        __FILE__,                   \
-        __LINE__,                   \
-        ##__VA_ARGS__)
+    //                                 \
+    // printf(                         \
+    //     "%s: ***%s(%d): " fmt "\n", \
+    //     enclave_name,               \
+    //     __FILE__,                   \
+    //     __LINE__,                   \
+    //     ##__VA_ARGS__)
 
 #endif // OE_SAMPLES_ATTESTATION_COMMON_LOG_H

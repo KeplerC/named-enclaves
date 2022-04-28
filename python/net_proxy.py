@@ -19,6 +19,9 @@ from kademlia import Server
 SERVER_ADDR = "128.32.37.74"
 SERVER_PORT = 8468
 
+
+first_time_receive_data = None 
+
 def get_external_ip():
     from requests import get
     ip = get('https://api.ipify.org').content.decode('utf8')
@@ -107,6 +110,8 @@ class CapsuleNetProxy():
             
     def receive(self):
         global LOCAL_NET_ENCLAVE_PORT
+        global first_time_receive_data
+        packet_counter = 0
         self.logger.warning("Network Proxy Receiving Thread started")
         # Socket to talk to server
         context = zmq.Context()
@@ -146,12 +151,16 @@ class CapsuleNetProxy():
                 # asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
 
             if(packet_type == b"DATA"):
-                print(splitted)
+                # print(splitted)
                 receiver = splitted[1].hex() 
                 sender = splitted[2].hex() 
                 data = splitted[3].decode()
-                self.logger.warning("[DATA] Receiver: " +  receiver + " Sender: " + sender + " Data: " + data)
-
+                # self.logger.warning("[DATA] Receiver: " +  receiver + " Sender: " + sender + " Data: " + data)
+                if first_time_receive_data == None:
+                    first_time_receive_data = time.time()
+                time_to_now = time.time() - first_time_receive_data
+                packet_counter += 1
+                self.logger.warning(f"{packet_counter}, {time_to_now}, {packet_counter/ time_to_now }")
                 dst = self.rib_cache.query(receiver)
                 self.send(dst, message)
 

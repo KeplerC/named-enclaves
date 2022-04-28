@@ -10,5 +10,5 @@ class Enclave:
         self.socket.connect (f"tcp://localhost:" + str(self.port))
     
     def send(self, message):
-        print(b"sent: " + message)
+        # print(b"sent: " + message)
         self.socket.send (message)

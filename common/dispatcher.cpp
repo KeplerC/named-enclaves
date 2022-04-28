@@ -307,19 +307,19 @@ int ecall_dispatcher::process_encrypted_message(message_t* message)
         TRACE_ENCLAVE("Decrypted data: ");
         for (uint32_t i = 0; i < data_size; ++i)
         {
-            printf("%d ", data[i]);
+            //printf("%d ", data[i]);
             if (m_enclave_config->enclave_secret_data[i] != data[i])
             {
-                printf(
-                    "Expecting [0x%x] but received unexpected value "
-                    "[0x%x]\n ",
-                    m_enclave_config->enclave_secret_data[i],
-                    data[i]);
+                // printf(
+                //     "Expecting [0x%x] but received unexpected value "
+                //     "[0x%x]\n ",
+                //     m_enclave_config->enclave_secret_data[i],
+                //     data[i]);
                 ret = 1;
                 break;
             }
         }
-        printf("\n");
+        // printf("\n");
     }
     else
     {
@@ -400,7 +400,7 @@ void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
     CapsuleAdvertise pdu = CapsuleAdvertise(evidence, pem_key );
     this->m_name = pdu.get_my_hash();
     void* ptr_to_msg = pdu.to_untrusted_string();
-    printf("the untrusted string is: %s", ptr_to_msg);
+    //printf("the untrusted string is: %s", ptr_to_msg);
     args->data = ptr_to_msg;
     args->data_size = pdu.get_payload_size();
     HotMsg_requestOCall( ocall_circular_buffer, requestedCallID++, args);
@@ -411,8 +411,8 @@ void ecall_dispatcher::put_advertisement(pem_key_t* pem_key,
 int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
 {
     TRACE_ENCLAVE("[EnclaveMsgStartResponder] started");
-    // gdp_switch* proc_pkt_role = new gdp_switch(this);
-    gdp_router* proc_pkt_role = new gdp_router(this);
+    gdp_switch* proc_pkt_role = new gdp_switch(this);
+    //gdp_router* proc_pkt_role = new gdp_router(this);
     int dataID = 0;
 
     static int i;
@@ -437,8 +437,8 @@ int  ecall_dispatcher::EnclaveMsgStartResponder( HotMsg *hotMsg )
         if(data_ptr->data){
             //Message exists!
             EcallParams * args = (EcallParams*) data_ptr->data;
-            printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
-            printf("[EnclaveMsgStartResponder] data is: %s\n", args->data);
+            //printf("[EnclaveMsgStartResponder] id is: %d\n",dataID);
+            //printf("[EnclaveMsgStartResponder] data is: %s\n", args->data);
             std::string s((char*)args->data, args->data_size);
             proc_pkt_role->proc_packet(s);
             data_ptr->data = 0;
