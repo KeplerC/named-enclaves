@@ -25,30 +25,28 @@ def get_external_ip():
     return ip
 
 
-async def put_key_value(boot_strap_server, key, value):
-    # Create a node and start listening on port 5678
-    node = Server()
-    await node.listen(5678)
-    await node.bootstrap([(boot_strap_server, SERVER_PORT)])
-    #await node.listen(SERVER_PORT)
+# async def put_key_value(boot_strap_server, key, value):
+#     # Create a node and start listening on port 5678
+#     node = Server()
+#     await node.listen(5678)
+#     await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+#     #await node.listen(SERVER_PORT)
 
-   # await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+#     # await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+#     # set a value for the key "my-key" on the network
+#     await node.set(key, value)
 
-    # set a value for the key "my-key" on the network
-    await node.set(key, value)
-    node.stop()
+# async def get_key_value(boot_strap_server, key):
+#     # Create a node and start listening on port 5678
+#     #await node.listen(SERVER_PORT)
+#     node = Server()
+#     await node.listen(8765)
+#     await node.bootstrap([(boot_strap_server, SERVER_PORT)])
+#     #await node.bootstrap([(boot_strap_server, SERVER_PORT)])
 
-async def get_key_value(boot_strap_server, key):
-    # Create a node and start listening on port 5678
-    #await node.listen(SERVER_PORT)
-    node = Server()
-    await node.listen(8765)
-    await node.bootstrap([(boot_strap_server, SERVER_PORT)])
-    #await node.bootstrap([(boot_strap_server, SERVER_PORT)])
-
-    # get the value associated with "my-key" from the network
-    return await node.get(key)
-    node.stop()
+#     # get the value associated with "my-key" from the network
+#     return await node.get(key)
+#     node.stop()
 
 
 
@@ -101,11 +99,11 @@ class CapsuleNetProxy():
         if query_name in self.rib_cache.rib and False: 
             self.logger.debug("Name is in RIB cache")
         else: 
-            ret = asyncio.run(get_key_value(SERVER_ADDR, query_name))
-            if not ret: 
-                self.logger.debug("Name is not in RIB cache, query ")
-                message = ("QUERY,,," + query_name).encode()
-                self.enclave_attached.send(message)
+            # ret = asyncio.run(get_key_value(SERVER_ADDR, query_name))
+            #if not ret: 
+            self.logger.debug("Name is not in RIB cache, query ")
+            message = ("QUERY,,," + query_name).encode()
+            self.enclave_attached.send(message)
             
     def receive(self):
         global LOCAL_NET_ENCLAVE_PORT
@@ -145,7 +143,7 @@ class CapsuleNetProxy():
                 self.enclave_attached.send(message)
                 # self.benchmark() 
 
-                asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
+                # asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
 
             if(packet_type == b"DATA"):
                 print(splitted)
