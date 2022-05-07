@@ -51,7 +51,10 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
     NetworkClient *nc = (NetworkClient *) args->net_addr;
     std::string m_address = nc->get_addr();
     TRACE_ENCLAVE("Using Address: %s", m_address.c_str());
-
+    zmq::context_t context (1);
+    // to router
+    zmq::socket_t* socket_ptr  = new  zmq::socket_t( context, ZMQ_PUSH);
+    socket_ptr -> connect ("tcp://" + std::string(NET_PROXY_IP) + ":" + std::string(NET_PROXY_PORT));
     int dataID = 0;
 
     static int i;
@@ -80,6 +83,7 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
 
           switch(data_ptr->ocall_id){
             case OCALL_PUT:
+
                 printf("[OCALL-circular-buffer] arg data arg ptr : %d\n", args);
                 printf("[OCALL-circular-buffer] arg data size : %d\n", args->data_size);
                 printf("[OCALL-circular-buffer] arg data size : %s\n", args->data);
@@ -90,7 +94,7 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
                 payload = std::string((char*) args->data, args->data_size) + ",,," + m_address;
                 msg = new zmq::message_t(payload.size());
                 memcpy(msg->data(), payload.c_str(), payload.size());
-                nc -> send_to_proxy(msg);
+                socket_ptr->send(*msg);
 
                 printf("[OCALL-circular-buffer] dc data : %s\n", msg->data());
                 break;
