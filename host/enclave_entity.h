@@ -46,11 +46,6 @@ static void* thread_run_net_client(void* net_client){
 //handler for ocall -> network
 static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
 
-    zmq::context_t context (1);
-    // to router
-    zmq::socket_t* socket_ptr  = new  zmq::socket_t( context, ZMQ_PUSH);
-    socket_ptr -> connect ("tcp://" + std::string(NET_PROXY_IP) + ":" + std::string(NET_PROXY_PORT));
-
     struct ocall_responder_args *args = (struct ocall_responder_args *) hot_msg_as_void_ptr;
     HotMsg *hotMsg = (HotMsg *) args->hotMsg;
     NetworkClient *nc = (NetworkClient *) args->net_addr;
@@ -95,7 +90,7 @@ static void *StartOcallResponder( void *hot_msg_as_void_ptr ) {
                 payload = std::string((char*) args->data, args->data_size) + ",,," + m_address;
                 msg = new zmq::message_t(payload.size());
                 memcpy(msg->data(), payload.c_str(), payload.size());
-                socket_ptr->send(*msg);
+                nc -> send_to_proxy(msg);
 
                 printf("[OCALL-circular-buffer] dc data : %s\n", msg->data());
                 break;
