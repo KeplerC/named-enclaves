@@ -37,10 +37,19 @@ void NetworkClient::run_message_receiver(){
             socket_recv.recv(&message);
             TRACE_ENCLAVE("[NetworkClient] Receive %s",message.data() );
             m_enclave_entity->ecall_send_to_enclave(message.data(), message.size());
+            //this->send_to_proxy(&message);
         }
     }
 }
 
+void NetworkClient::send_to_proxy(zmq::message_t* msg){
+
+    zmq::context_t context (1);
+    // to router
+    zmq::socket_t* socket_ptr  = new  zmq::socket_t( context, ZMQ_PUSH);
+    socket_ptr -> connect ("tcp://" + std::string(NET_PROXY_IP) + ":" + std::string(NET_PROXY_PORT));
+    socket_ptr->send(*msg);
+}
 
 zmq::message_t NetworkClient::string_to_message(const std::string& s) {
     zmq::message_t msg(s.size());

@@ -11,6 +11,7 @@ class NetworkClient {
 public:
     NetworkClient(Enclave_Entity* enclave);
     void run_message_receiver(); 
+    void send_to_proxy(zmq::message_t* msg);
 
     int get_port(){
         return m_port;
@@ -25,6 +26,7 @@ private:
     std::string message_to_string(const zmq::message_t& message);
     std::string recv_string(zmq::socket_t* socket);
     void send_string(const std::string& s, zmq::socket_t* socket);
+
 
 private:
     Enclave_Entity* m_enclave_entity; 
