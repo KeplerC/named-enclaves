@@ -157,10 +157,11 @@ class CapsuleNetProxy():
                 data = splitted[3].decode()
                 # self.logger.warning("[DATA] Receiver: " +  receiver + " Sender: " + sender + " Data: " + data)
                 if first_time_receive_data == None:
-                    first_time_receive_data = time.time()
-                time_to_now = time.time() - first_time_receive_data
+                        first_time_receive_data = time.time()
+                if packet_counter % 100 == 1: 
+                    time_to_now = time.time() - first_time_receive_data
+                    self.logger.warning(f"{packet_counter}, {time_to_now}, {packet_counter/ time_to_now }")
                 packet_counter += 1
-                self.logger.warning(f"{packet_counter}, {time_to_now}, {packet_counter/ time_to_now }")
                 dst = self.rib_cache.query(receiver)
                 self.send(dst, message)
 

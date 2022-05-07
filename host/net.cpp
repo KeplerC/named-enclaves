@@ -25,6 +25,10 @@ void NetworkClient::run_message_receiver(){
     socket_recv.bind ("tcp://*:" + std::to_string(m_port));
     TRACE_ENCLAVE("[NetworkClient] Network Client thread started!");
 
+    // to router
+    zmq::socket_t* socket_ptr  = new  zmq::socket_t( context, ZMQ_PUSH);
+    socket_ptr -> connect ("tcp://" + std::string(NET_PROXY_IP) + ":" + std::string(NET_PROXY_PORT));
+
     std::vector<zmq::pollitem_t> pollitems = {
         { static_cast<void *>(socket_recv), 0, ZMQ_POLLIN, 0 },
     };
@@ -33,11 +37,11 @@ void NetworkClient::run_message_receiver(){
         zmq::poll(pollitems.data(), pollitems.size(), 0);
 
         if (pollitems[0].revents & ZMQ_POLLIN){
-            zmq::message_t message;
-            socket_recv.recv(&message);
-            TRACE_ENCLAVE("[NetworkClient] Receive %s",message.data() );
-            //m_enclave_entity->ecall_send_to_enclave(message.data(), message.size());
-            this->send_to_proxy(&message);
+            zmq::message_t* message = new zmq::message_t();
+            socket_recv.recv(message);
+            TRACE_ENCLAVE("[NetworkClient] Receive %s",message->data() );
+            //m_enclave_entity->ecall_send_to_enclave(message->data(), message->size());
+            socket_ptr->send(*message);
         }
     }
 }
