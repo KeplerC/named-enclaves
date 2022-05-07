@@ -11,11 +11,20 @@ add_custom_command(
 
 add_executable(attestation_host
                host.cpp net.cpp ${CMAKE_CURRENT_BINARY_DIR}/attestation_u.c)
+
+
+set(OPENSSL_USE_STATIC_LIBS TRUE)
+find_package(OpenSSL REQUIRED)
+
+
 target_include_directories(
   attestation_host
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../ # For common/shared.h
+  PRIVATE 
+          OpenSSL::Crypto
+          ${CMAKE_CURRENT_SOURCE_DIR}/../ # For common/shared.h
           ${CMAKE_CURRENT_BINARY_DIR}
-          ${CMAKE_CURRENT_SOURCE_DIR}/../common)
+          ${CMAKE_CURRENT_SOURCE_DIR}/../common
+          )
 
 if (WIN32)
   add_dcap_client_target(attestation_dcap_target)
