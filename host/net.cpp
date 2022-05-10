@@ -226,8 +226,9 @@ void NetworkClient::run_message_receiver(){
 
 
             m_enclave_entity->ecall_send_to_enclave(message->data(), message->size());
+            this->m_enclave_entity->dummy_ecall();
             
-            socket_ptr->send(*message);
+            // socket_ptr->send(*message);
         }
     }
 }

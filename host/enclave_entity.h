@@ -191,6 +191,12 @@ public:
         HotMsg_requestECall( circ_buffer_enclave, requestedCallID++, args);
     }
 
+    void dummy_ecall(){
+        int ret = 1;
+        format_settings_t format_settings = {0};
+        get_enclave_format_settings(m_enclave, &ret, &sgx_remote_uuid, &format_settings);
+    }
+
     std::string m_addr; 
 private: 
     oe_enclave_t* m_enclave; 
