@@ -91,7 +91,7 @@ public:
     }
     void proc_data(std::vector<std::string> splitted) override{
         TRACE_ENCLAVE("[GDP Switch] Got Data %s",  splitted[3].c_str());
-        m_dispatcher->put_capsule(splitted[3].c_str());
+        m_dispatcher->put_capsule("hello");
     }
 private: 
     RIB m_rib; 

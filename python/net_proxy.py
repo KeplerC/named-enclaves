@@ -15,7 +15,7 @@ import socket
 import random
 import asyncio
 from kademlia import Server
-
+import os 
 SERVER_ADDR = "128.32.37.74"
 SERVER_PORT = 8468
 
@@ -146,24 +146,23 @@ class CapsuleNetProxy():
                 self.logger.warning("Enclave attached with " + str(LOCAL_NET_ENCLAVE_PORT))
                 
                 self.enclave_attached.send(message)
-                # self.benchmark() 
+                self.benchmark() 
 
                 # asyncio.run(put_key_value(SERVER_ADDR,hash.hex(), message))
 
             if(packet_type == b"DATA"):
-                # print(splitted)
                 receiver = splitted[1].hex() 
                 sender = splitted[2].hex() 
                 data = splitted[3].decode()
                 # self.logger.warning("[DATA] Receiver: " +  receiver + " Sender: " + sender + " Data: " + data)
                 if first_time_receive_data == None:
                         first_time_receive_data = time.time()
-                if packet_counter % 100 == 1: 
+                if packet_counter % 10000 == 1: 
                     time_to_now = time.time() - first_time_receive_data
                     self.logger.warning(f"{packet_counter}, {time_to_now}, {packet_counter/ time_to_now }")
                 packet_counter += 1
-                dst = self.rib_cache.query(receiver)
-                self.send(dst, message)
+                # dst = self.rib_cache.query(receiver)
+                # self.send(dst, message)
 
 
     def check_enclave_attached(self):
@@ -189,7 +188,8 @@ class CapsuleNetProxy():
 
 
     def benchmark(self):
-        self.benchmark_switch()
+        thread = Thread(target = self.benchmark_switch, args = ())
+        thread.start()
 
     def fake_datagram(self, size = 20):
         return b"DATA,,,xklzjCx,,,dksjfljsld,,," + b"s" * size + b",,,localhost:5030"
@@ -198,9 +198,8 @@ class CapsuleNetProxy():
         self.logger.warning("running switch benchmark")
         datagram = self.fake_datagram()
         print(datagram)
-        #for i in range(5):
-        self.enclave_attached.send(datagram)
-
+        while(True):
+            self.enclave_attached.send(datagram)
 
 
 

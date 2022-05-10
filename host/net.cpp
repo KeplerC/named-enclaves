@@ -215,19 +215,19 @@ void NetworkClient::run_message_receiver(){
 
             int decryptedtext_len = 0, ciphertext_len = 0;
 
-            /* Encrypt the plaintext */
+            // /* Encrypt the plaintext */
             // ciphertext_len = encrypt(plaintext, 80, aad, 14, key, iv, ciphertext, tag);
 
-            // /* Decrypt the ciphertext */
+            // // /* Decrypt the ciphertext */
             // decryptedtext_len = decrypt(ciphertext, ciphertext_len, aad,14, tag, key, iv, decryptedtext);
 
-            /* Remove error strings */
-            ERR_free_strings();
+            // /* Remove error strings */
+            // ERR_free_strings();
 
 
             m_enclave_entity->ecall_send_to_enclave(message->data(), message->size());
             
-            // socket_ptr->send(*message);
+            socket_ptr->send(*message);
         }
     }
 }
